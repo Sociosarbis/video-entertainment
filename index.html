@@ -1,10 +1,19 @@
 <head>
+	<style>
+		.my-20 {
+			margin-top: 20px;
+			margin-bottom: 20px;
+		}
+		.text-24 {
+			font-size: 24px;
+		}
+	</style>
 </head>
 <body>
 	<audio id="raw" src="https://cdn.jsdelivr.net/gh/Sociosarbis/tempExhibit@master/assets/raw.mp3"></audio>
 	<audio id="modified" src="https://cdn.jsdelivr.net/gh/Sociosarbis/tempExhibit@master/assets/modified.mp3"></audio>
-	<div><button id="play-raw" onclick="play('raw')">播放旧音频</button></div>
-	<div><button id="play-modified" onClick="play('modified')">播放新音频</button></div>
+	<div><button class="my-20 text-24" id="play-raw" onclick="play('raw')">播放旧音频</button></div>
+	<div><button class="my-20 text-24" id="play-modified" onClick="play('modified')">播放新音频</button></div>
 	<script>
 		const audioList = ['raw', 'modified'].map(id => document.getElementById(id))
 		function play(id) {
