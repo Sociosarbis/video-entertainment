@@ -1,8 +1,22 @@
-<html>
 <head>
 </head>
 <body>
-	<iframe width="100%" height="100%" style="border:none" src="https://file422c69311edd.aiwall.com/v3/idea/hRkyZ8MF">
-	</iframe>
+	<audio id="raw" src="https://cdn.jsdelivr.net/gh/Sociosarbis/tempExhibit@master/assets/raw.mp3"></audio>
+	<audio id="modified" src="https://cdn.jsdelivr.net/gh/Sociosarbis/tempExhibit@master/assets/modified.mp3"></audio>
+	<div><button id="play-raw" onclick="play('raw')">播放旧音频</button></div>
+	<div><button id="play-modified" onClick="play('modified')">播放新音频</button></div>
+	<script>
+		const audioList = ['raw', 'modified'].map(id => document.getElementById(id))
+		function play(id) {
+			audioList.forEach($audio => {
+				if ($audio.id === id) {
+					$audio.play()
+				} else {
+					$audio.pause()
+					$audio.currentTime = 0
+				}
+			})
+		}
+        </script>
 </body>
 </html>
