@@ -1,32 +1,43 @@
+<html>
 <head>
-        <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-	<style>
-		.my-20 {
-			margin-top: 40px;
-			margin-bottom: 40px;
-		}
-		.text-24 {
-			font-size: 48px;
-		}
-	</style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width:device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scale=no;">
+    <script src="/static/js/hls.min.js"></script>
+    <style>
+    * {
+        font-size: 14px;
+    }
+    body {
+        margin: 0;
+    }
+    </style>
 </head>
-<body>
-	<audio id="raw" src="https://cdn.jsdelivr.net/gh/Sociosarbis/tempExhibit@master/assets/raw.mp3"></audio>
-	<audio id="modified" src="https://cdn.jsdelivr.net/gh/Sociosarbis/tempExhibit@master/assets/modified.mp3"></audio>
-	<div><button class="my-20 text-24" id="play-raw" onclick="play('raw')">播放旧音频</button></div>
-	<div><button class="my-20 text-24" id="play-modified" onClick="play('modified')">播放新音频</button></div>
-	<script>
-		const audioList = ['raw', 'modified'].map(id => document.getElementById(id))
-		function play(id) {
-			audioList.forEach($audio => {
-				if ($audio.id === id) {
-					$audio.play()
-				} else {
-					$audio.pause()
-					$audio.currentTime = 0
-				}
-			})
-		}
-        </script>
+<body style="padding: 10px;">
+    <div>
+        <div style="display:flex;margin-bottom: 20px;">
+            <input style="width:100%" id="url-input" placeholder="mp4视频链接"></input>
+            <input id="replace-video-button" type="button" value="替换视频"></input>
+        </div>
+        <video style="width: 100%;" id="player" src="" controls="true" crossorigin="anonymous"></video>
+    </div>
+    <script>
+        const replaceButton = document.getElementById('replace-video-button')
+        const player = document.getElementById('player')
+        const urlInput = document.getElementById('url-input')
+        const hls = new Hls();
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            player.play();
+        });
+        replaceButton.addEventListener('click', function () {
+            hls.detachMedia()
+            if (/\.m3u8/.test(urlInput.value)) {
+                hls.attachMedia(player)
+                hls.loadSource(urlInput.value)
+            } else {
+                player.setAttribute('src', urlInput.value)
+                player.play()
+            }
+        })
+    </script>
 </body>
 </html>
