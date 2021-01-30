@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width:device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scale=no;">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scale=no">
     <script src="./static/js/hls.min.js"></script>
     <style>
     * {
@@ -35,10 +35,11 @@
             player.play();
         });
         replaceButton.addEventListener('click', function () {
-						const match = urlInput.value.trim().match(urlInput.value)
+						const match = urlInput.value.trim().match(urlRegExp)
 						hls.detachMedia()
 						if (match) {
 							const url = match[0]
+							urlInput.value = url
 							if (/\.m3u8/.test(url)) {
                 hls.attachMedia(player)
                 hls.loadSource(url)
