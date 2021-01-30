@@ -26,6 +26,7 @@
 		</div>
 		<video class="w-full" id="player" src="" controls="true" crossorigin="anonymous"></video>
     <script>
+				const urlRegExp = /([a-zA-Z0-9]+:)?\/*?([^#\?\/:]+)(:\d+)?([^:#\?]*?)(\?[^#]*)?(#.*)?$/
         const replaceButton = document.getElementById('replace-video-button')
         const player = document.getElementById('player')
         const urlInput = document.getElementById('url-input')
@@ -34,14 +35,18 @@
             player.play();
         });
         replaceButton.addEventListener('click', function () {
-            hls.detachMedia()
-            if (/\.m3u8/.test(urlInput.value)) {
+						const match = urlInput.value.trim().match(urlInput.value)
+						hls.detachMedia()
+						if (match) {
+							const url = match[0]
+							if (/\.m3u8/.test(url)) {
                 hls.attachMedia(player)
-                hls.loadSource(urlInput.value)
-            } else {
-                player.setAttribute('src', urlInput.value)
-                player.play()
-            }
+                hls.loadSource(url)
+							} else {
+									player.setAttribute('src', url)
+									player.play()
+							}
+						}
         })
     </script>
 </body>
