@@ -7,19 +7,24 @@
     * {
         font-size: 14px;
     }
-    body {
-        margin: 0;
-    }
+		.w-full {
+			width: 100%;
+		}
+		.mb-2 {
+			margin-bottom: 10px;
+		}
+		.mr-1 {
+			margin-right: 5px; 
+		}
     </style>
 </head>
-<body style="padding: 10px;">
-    <div>
-        <div style="display:flex;margin-bottom: 20px;">
-            <input style="width:100%" id="url-input" placeholder="mp4视频链接"></input>
-            <input id="replace-video-button" type="button" value="替换视频"></input>
-        </div>
-        <video style="width: 100%;" id="player" src="" controls="true" crossorigin="anonymous"></video>
-    </div>
+<body>
+		<input class="w-full mb-2" id="url-input" placeholder="视频链接">
+		<div class="mb-2">
+			<input id="replace-video-button" class="mr-1" type="button" value="替换视频">
+			<button><a href="//www.zuidazy3.net/index.php" target="resource-center">资源中心</a></button>
+		</div>
+		<video class="w-full" id="player" src="" controls="true" crossorigin="anonymous"></video>
     <script>
         const replaceButton = document.getElementById('replace-video-button')
         const player = document.getElementById('player')
