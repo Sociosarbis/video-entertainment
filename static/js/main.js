@@ -14,7 +14,7 @@ window.addEventListener("load", () => {
     hls.detachMedia();
     if (match) {
       let url = match[0];
-      if (match === "http:") {
+      if (match[1] === "http:") {
         url = url.replace(/^http:/, "https:");
       }
       urlInput.value = url;
