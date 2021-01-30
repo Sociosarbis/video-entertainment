@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scale=no">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
     <script src="./static/js/hls.min.js"></script>
     <style>
     * {
@@ -25,30 +25,6 @@
 			<button><a href="//www.zuidazy3.net/index.php" target="resource-center">资源中心</a></button>
 		</div>
 		<video class="w-full" id="player" src="" controls="true" crossorigin="anonymous"></video>
-    <script>
-				const urlRegExp = /([a-zA-Z0-9]+:)?\/*?([^#\?\/:]+)(:\d+)?([^:#\?]*?)(\?[^#]*)?(#.*)?$/
-        const replaceButton = document.getElementById('replace-video-button')
-        const player = document.getElementById('player')
-        const urlInput = document.getElementById('url-input')
-        const hls = new Hls();
-        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-            player.play();
-        });
-        replaceButton.addEventListener('click', function () {
-						const match = urlInput.value.trim().match(urlRegExp)
-						hls.detachMedia()
-						if (match) {
-							const url = match[0]
-							urlInput.value = url
-							if (/\.m3u8/.test(url)) {
-                hls.attachMedia(player)
-                hls.loadSource(url)
-							} else {
-									player.setAttribute('src', url)
-									player.play()
-							}
-						}
-        })
-    </script>
+    <script type="text/javascript" src="./static/js/main.js"></script>
 </body>
 </html>
