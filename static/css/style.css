@@ -680,6 +680,7 @@ html {
   box-shadow: var(--color-btn-shadow),var(--color-btn-inset-shadow);
   transition: .2s cubic-bezier(0.3, 0, 0.5, 1);
   transition-property: color,background-color,border-color;
+  cursor: pointer;
 }
 
 .text-btn {
@@ -694,7 +695,7 @@ html {
 .input {
   color: var(--color-text-white);
   background-color: #000;
-  border: none;
+  border: 1px solid transparent;
 }
 
 .input:focus {
