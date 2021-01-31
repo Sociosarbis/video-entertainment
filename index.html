@@ -2,29 +2,18 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
-    <script src="./static/js/hls.min.js"></script>
-    <style>
-    * {
-        font-size: 14px;
-    }
-		.w-full {
-			width: 100%;
-		}
-		.mb-2 {
-			margin-bottom: 10px;
-		}
-		.mr-1 {
-			margin-right: 5px; 
-		}
-    </style>
+		<link rel="stylesheet" src="./static/css/style.css"></link>
+		<script src="./static/js/hls.min.js"></script>
 </head>
-<body>
-		<input class="w-full mb-2" id="url-input" placeholder="视频链接">
+<body class="bg-canvas">
+		<input class="w-full mb-2 bg-black input" id="url-input" placeholder="视频链接">
 		<div class="mb-2">
-			<input id="replace-video-button" class="mr-1" type="button" value="替换视频">
-			<button><a href="http://www.zuidazy3.net/index.php" target="resource-center">资源中心</a></button>
+			<input id="replace-video-button" class="mr-1 btn" type="button" value="替换视频">
+			<button class="btn"><a class="text-btn" href="http://www.zuidazy3.net/index.php" target="resource-center">资源中心</a></button>
 		</div>
-		<video class="w-full" id="player" src="" controls="true" crossorigin="anonymous"></video>
-    <script type="text/javascript" src="./static/js/main.js"></script>
+		<div class="text-center">
+			<video class="w-full" id="player" src="" controls="true" crossorigin="anonymous"></video>
+		</div>
+		<script type="text/javascript" src="./static/js/main.js"></script>
 </body>
 </html>
