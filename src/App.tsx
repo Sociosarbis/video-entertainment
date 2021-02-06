@@ -73,7 +73,7 @@ function App() {
           </a>
         </button>
       </div>
-      <div className="text-center">
+      <div className="text-center mb-2">
         <video
           className="w-full"
           id="player"

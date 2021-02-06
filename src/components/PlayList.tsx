@@ -1,5 +1,6 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import cls from 'classnames';
+import { makeStyles } from '@material-ui/core';
 
 type PlayListProps = {
   onSelect: (url: string) => void;
@@ -11,7 +12,25 @@ type Resource = {
   url: string;
 };
 
+const useStyle = makeStyles({
+  container: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
+    gridRowGap: '10px',
+    gridColumnGap: '5px',
+  },
+});
+
+function usePrevious<T>(value: T) {
+  const ref = useRef<T>();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
+
 export default function PlayList(props: PlayListProps) {
+  const classes = useStyle({});
   const { onSelect, currentUrl } = props;
   const [text, setText] = useState('');
   const [list, setList] = useState<Resource[]>([]);
@@ -48,15 +67,17 @@ export default function PlayList(props: PlayListProps) {
     }
   }, []);
 
+  const prevList = usePrevious(list);
+
   useEffect(() => {
-    if (list.length) {
+    if (list.length && list !== prevList) {
       const prevChapUrl =
         window.localStorage.getItem(`PREV_CHAP$${list[0].url}`) || '';
       if (prevChapUrl) {
         onSelect(prevChapUrl);
       }
     }
-  }, [list, onSelect]);
+  }, [list, prevList, onSelect]);
   return (
     <div>
       <textarea
@@ -72,13 +93,11 @@ export default function PlayList(props: PlayListProps) {
         value="加载播放列表"
         onClick={loadPlayList}
       />
-      <div>
+      <div className={classes.container}>
         {list.map((item, i) => (
           <input
             key={i}
             className={cls([
-              'mr-1',
-              'mb-2',
               'btn',
               item.url === currentUrl ? 'btn_selected' : '',
             ])}
