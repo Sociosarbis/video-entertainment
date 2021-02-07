@@ -10,6 +10,14 @@ const extendWebpackConfig = {
   externals: {
     'hls.js': 'window.Hls',
   },
+  output: {
+    publicPath:
+      process.env.NODE_ENV === 'production'
+        ? process.env.NETLIFY
+          ? '/'
+          : '/tempExhibit'
+        : '',
+  },
 };
 
 module.exports = function override(config) {
