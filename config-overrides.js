@@ -1,6 +1,15 @@
 const { merge } = require('webpack-merge');
 const path = require('path');
 
+const publicPath =
+  process.env.NODE_ENV === 'production'
+    ? true || process.env.NETLIFY
+      ? '/'
+      : '/tempExhibit'
+    : '';
+
+process.env.PUBLIC_URL = publicPath;
+
 const extendWebpackConfig = {
   resolve: {
     alias: {
@@ -11,12 +20,7 @@ const extendWebpackConfig = {
     'hls.js': 'window.Hls',
   },
   output: {
-    publicPath:
-      process.env.NODE_ENV === 'production'
-        ? process.env.NETLIFY
-          ? '/'
-          : '/tempExhibit'
-        : '',
+    publicPath,
   },
 };
 
