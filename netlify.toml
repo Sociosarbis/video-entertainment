@@ -1,6 +1,6 @@
 [build]
   functions = "netlify/functions"
 [build.environment]
-  NETLIFY = true
+  NETLIFY = "true"
 [dev]
   functions = "netlify/functions"
