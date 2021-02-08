@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ESNext",
+    "outDir": "netlify/functions",
+    "noEmit": false
+  },
+  "include": [
+    "functions"
+  ],
+  "exclude": [
+    "src"
+  ]
+}

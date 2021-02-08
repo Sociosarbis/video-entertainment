@@ -3,7 +3,7 @@ const path = require('path');
 
 const publicPath =
   process.env.NODE_ENV === 'production'
-    ? true || process.env.NETLIFY
+    ? process.env.NETLIFY
       ? '/'
       : '/tempExhibit'
     : '';

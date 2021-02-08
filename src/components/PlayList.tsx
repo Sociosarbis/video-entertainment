@@ -1,10 +1,18 @@
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, {
+  useCallback,
+  useState,
+  useEffect,
+  forwardRef,
+  MutableRefObject,
+} from 'react';
 import cls from 'classnames';
 import { makeStyles } from '@material-ui/core';
+import { Work } from '../apis/work';
 
 type PlayListProps = {
   onSelect: (url: string) => void;
   currentUrl: string;
+  work: Work | null;
 };
 
 type Resource = {
@@ -21,21 +29,16 @@ const useStyle = makeStyles({
   },
 });
 
-function usePrevious<T>(value: T) {
-  const ref = useRef<T>();
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
-}
+export type PlayListRef = {
+  loadPlayList: (work: Work) => void;
+};
 
-export default function PlayList(props: PlayListProps) {
+export default forwardRef<PlayListRef, PlayListProps>((props, ref) => {
   const classes = useStyle({});
-  const { onSelect, currentUrl } = props;
-  const [text, setText] = useState('');
+  const { onSelect, currentUrl, work } = props;
   const [list, setList] = useState<Resource[]>([]);
-  const loadPlayList = useCallback(() => {
-    const list = text
+  const loadPlayList = useCallback((work: Work) => {
+    const list = work.playList
       .split('\n')
       .map((line) => {
         const [name, url] = line.trim().split('$');
@@ -48,51 +51,31 @@ export default function PlayList(props: PlayListProps) {
       })
       .filter(Boolean) as Resource[];
     setList(list);
-    window.localStorage.setItem(`PREV_LIST`, JSON.stringify(list));
-  }, [text]);
+  }, []);
+
+  (ref as MutableRefObject<PlayListRef>).current = {
+    loadPlayList,
+  };
 
   const handleSelect = useCallback(
     (item: Resource) => {
-      window.localStorage.setItem(`PREV_CHAP$${list[0].url}`, item.url);
+      window.localStorage.setItem(`PREV_CHAP$${work?.url}`, item.url);
       onSelect(item.url);
     },
-    [onSelect, list],
+    [onSelect, work],
   );
 
   useEffect(() => {
-    try {
-      setList(JSON.parse(window.localStorage.getItem(`PREV_LIST`) || '[]'));
-    } catch {
-      //
-    }
-  }, []);
-
-  const prevList = usePrevious(list);
-
-  useEffect(() => {
-    if (list.length && list !== prevList) {
+    if (list.length && work) {
       const prevChapUrl =
-        window.localStorage.getItem(`PREV_CHAP$${list[0].url}`) || '';
+        window.localStorage.getItem(`PREV_CHAP$${work?.url}`) || '';
       if (prevChapUrl) {
         onSelect(prevChapUrl);
       }
     }
-  }, [list, prevList, onSelect]);
-  return (
+  }, [list, onSelect, work]);
+  return work ? (
     <div>
-      <textarea
-        className="w-full bg-black input mb-2"
-        placeholder="输入播放列表"
-        style={{ resize: 'none', height: '100px' }}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-      />
-      <input
-        type="button"
-        className="mr-1 btn mb-2"
-        value="加载播放列表"
-        onClick={loadPlayList}
-      />
       <div className={classes.container}>
         {list.map((item, i) => (
           <input
@@ -109,5 +92,5 @@ export default function PlayList(props: PlayListProps) {
         <span />
       </div>
     </div>
-  );
-}
+  ) : null;
+});

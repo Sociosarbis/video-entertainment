@@ -724,3 +724,11 @@ html {
 .bg-canvas {
   background-color: var(--color-bg-canvas);
 }
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
