@@ -16,6 +16,10 @@ const useStyle = makeStyles({
     gridRowGap: '10px',
     gridColumnGap: '5px',
   },
+  scroller: {
+    height: '300px',
+    overflow: 'auto',
+  },
 });
 
 export default function PlayList(props: PlayListProps) {
@@ -40,7 +44,7 @@ export default function PlayList(props: PlayListProps) {
     }
   }, [onSelect, work]);
   return work ? (
-    <div>
+    <div className={classes.scroller}>
       <div className={classes.container}>
         {work.playList.map((item, i) => (
           <input
