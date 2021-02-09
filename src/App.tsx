@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 import Hls from 'hls.js';
-import PlayList, { PlayListRef } from './components/PlayList';
+import PlayList from './components/PlayList';
 import { CustomThemeProvider } from './CustomThemeProvider';
 import { useListDialog } from './components/ListDialog';
 import { useLoading } from './components/Loading';
@@ -45,13 +45,11 @@ function App() {
   const { showMessage, Message } = useMessage();
   const { withLoading, Loading } = useLoading();
   const [work, setWork] = useState<Work | null>(null);
-  const playListRef = useRef<PlayListRef>(null);
   const onSelectPlayList = useCallback(
     async (item: FindWorksResponse[0]) => {
       const res = await withLoading(workApis.getPlayList(item.url));
       if (res.playList.length) {
         const work = Object.assign(item, res);
-        playListRef.current && playListRef.current.loadPlayList(work);
         setWork(work);
         window.localStorage.setItem('PREV_LIST', JSON.stringify(item));
       } else {
@@ -150,12 +148,7 @@ function App() {
           ></video>
         </div>
         {work ? <WorkDetail poster={work.image} name={work.name} /> : null}
-        <PlayList
-          ref={playListRef}
-          currentUrl={videoUrl}
-          work={work}
-          onSelect={(url) => handlePlay(url)}
-        />
+        <PlayList currentUrl={videoUrl} work={work} onSelect={handlePlay} />
         <ListDialog
           list={workList}
           title="搜索结果"

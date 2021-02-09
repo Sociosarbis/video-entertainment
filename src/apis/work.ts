@@ -16,10 +16,16 @@ export type FindWorksResponse = {
   url: string;
 }[];
 
+export type Resource = {
+  name: string;
+  url: string;
+};
+
 export type GetPlayListResponse = {
-  playList: string;
+  playList: Resource[];
   image: string;
 };
+
 export type Work = FindWorksResponse[0] & GetPlayListResponse;
 
 class WorkApis {
@@ -31,12 +37,25 @@ class WorkApis {
     });
   }
 
-  getPlayList(url: string): Promise<GetPlayListResponse> {
-    return axiosInst.get('getPlayList', {
+  async getPlayList(url: string): Promise<GetPlayListResponse> {
+    const res = await axiosInst.get<any, any>('getPlayList', {
       params: {
         url,
       },
     });
+    res.playList = res.playList
+      .split('\n')
+      .map((line: string) => {
+        const [name, url] = line.trim().split('$');
+        return name && url
+          ? {
+              name,
+              url: url.replace(/^http:/, 'https:'),
+            }
+          : null;
+      })
+      .filter(Boolean) as Resource[];
+    return res;
   }
 }
 
