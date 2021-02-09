@@ -163,21 +163,21 @@ function Home() {
         placeholder="影片名称"
         onChange={(e) => setInputValue(e.target.value)}
       />
+      <div className="mb-2">
+        <input
+          id="replace-video-button"
+          className="mr-1 btn"
+          type="button"
+          value="搜索影片"
+          onClick={async () => {
+            if (!inputValue.trim()) return showMessage('影片名称不可为空');
+            const res = await withLoading(workApis.findWorks(inputValue));
+            setWorkList(res);
+            setOpen(true);
+          }}
+        />
+      </div>
       <Grid item className="overflow-auto flex-1">
-        <div className="mb-2">
-          <input
-            id="replace-video-button"
-            className="mr-1 btn"
-            type="button"
-            value="搜索影片"
-            onClick={async () => {
-              if (!inputValue.trim()) return showMessage('影片名称不可为空');
-              const res = await withLoading(workApis.findWorks(inputValue));
-              setWorkList(res);
-              setOpen(true);
-            }}
-          />
-        </div>
         <div className="text-center mb-2">
           <video
             className="w-full"
