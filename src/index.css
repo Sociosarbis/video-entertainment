@@ -732,3 +732,29 @@ html {
 .text-center {
   text-align: center;
 }
+
+.bottom-navigation-page {
+  padding-bottom: 50px;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.mr-2 {
+  margin-right: 10px;
+}
+
+.overflow-auto {
+  overflow: auto;
+}
+
+.flex-1 {
+  flex: 1;
+}

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import cls from 'classnames';
 import { makeStyles } from '@material-ui/core';
 import { Work, Resource } from '../apis/work';
@@ -34,15 +34,6 @@ export default function PlayList(props: PlayListProps) {
     [onSelect, work],
   );
 
-  useEffect(() => {
-    if (work) {
-      const prevChapUrl =
-        window.localStorage.getItem(`PREV_CHAP$${work?.url}`) || '';
-      if (prevChapUrl) {
-        onSelect(prevChapUrl);
-      }
-    }
-  }, [onSelect, work]);
   return work ? (
     <div className={classes.scroller}>
       <div className={classes.container}>
