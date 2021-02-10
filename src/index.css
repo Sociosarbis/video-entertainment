@@ -758,3 +758,19 @@ html {
 .flex-1 {
   flex: 1;
 }
+
+.slide-up-enter-active {
+  transition: transform 250ms cubic-bezier(0.4, 0.0, 1, 1);
+}
+
+.slide-up-exit-active {
+  transition: transform 200ms cubic-bezier(0.0, 0.0, 0.2, 1);
+}
+
+.slide-up-enter, .slide-up-exit-active, .slide-up-exit-done {
+  transform: translate3d(0, 100%, 0);
+}
+
+.slide-up-enter-active {
+  transform: translate3d(0, 0, 0);
+}

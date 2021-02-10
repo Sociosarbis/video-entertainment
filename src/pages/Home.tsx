@@ -133,7 +133,7 @@ function Home() {
       handlePlay,
     },
     async ({ db, player, handlePlay }) => {
-      try {
+      /*try {
         const items = await db.getRange('history', 0, 1, {
           index: 'utime',
           order: 'prev',
@@ -144,7 +144,7 @@ function Home() {
         }
       } catch {
         //
-      }
+      }*/
     },
   );
 

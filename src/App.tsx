@@ -1,6 +1,7 @@
 import React from 'react';
 import cls from 'classnames';
 import { Route, useHistory } from 'react-router-dom';
+import { CSSTransition } from 'react-transition-group';
 import { CustomThemeProvider } from './CustomThemeProvider';
 import { useLoading } from './components/Loading';
 import { useMessage } from './components/Message';
@@ -28,7 +29,19 @@ function MainApp() {
   return (
     <PlayerContext.Provider value={player}>
       <Route component={Home}></Route>
-      <Route path="/history" component={History}></Route>
+      <Route path="/history">
+        {({ match }) => (
+          <CSSTransition
+            in={match != null}
+            classNames="slide-up"
+            timeout={{ enter: 250, exit: 200 }}
+            mountOnEnter={true}
+            unmountOnExit={true}
+          >
+            <History />
+          </CSSTransition>
+        )}
+      </Route>
     </PlayerContext.Provider>
   );
 }

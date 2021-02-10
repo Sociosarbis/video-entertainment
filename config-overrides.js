@@ -5,7 +5,7 @@ const publicPath =
   process.env.NODE_ENV === 'production'
     ? process.env.NETLIFY
       ? '/'
-      : '/tempExhibit'
+      : '/tempExhibit/'
     : '';
 
 process.env.PUBLIC_URL = publicPath;
