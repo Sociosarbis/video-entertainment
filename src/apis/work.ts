@@ -47,24 +47,11 @@ class WorkApis {
   }
 
   async getPlayList(url: string): Promise<GetPlayListResponse> {
-    const res = await axiosInst.get<any, any>('getPlayList', {
+    return await axiosInst.get<any, any>('getPlayList', {
       params: {
         url,
       },
     });
-    res.playList = res.playList
-      .split('\n')
-      .map((line: string) => {
-        const [name, url] = line.trim().split('$');
-        return name && url
-          ? {
-              name,
-              url: url.replace(/^http:/, 'https:'),
-            }
-          : null;
-      })
-      .filter(Boolean) as Resource[];
-    return res;
   }
 
   async getWorkFromDB(url: string) {

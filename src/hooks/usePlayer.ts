@@ -7,7 +7,9 @@ import React, {
   useMemo,
 } from 'react';
 import { GlobalContext, GlobalContextValue } from '../contexts';
-import workApis, { FindWorksResponse, Work } from '../apis/work';
+import { FindWorksResponse, Work } from '../apis/work';
+import { useApolloClient } from 'react-apollo';
+import { gql } from 'apollo-boost';
 
 export type Player = {
   work: Work | null;
@@ -27,10 +29,30 @@ export default function usePlayer(): Player {
   ) as GlobalContextValue;
   const [work, setWork] = useState<Work | null>(null);
   const [videoUrl, setVideoUrl] = useState('');
+  const client = useApolloClient();
   const selectPlayList = useCallback(
     async (item: FindWorksResponse[0]) => {
       if (work && item.url === work.url) return;
-      const res = await withLoading(workApis.getPlayList(item.url));
+      const {
+        data: { workDetail: res },
+      } = await withLoading(
+        client.query({
+          query: gql`
+            query GetPlayList($url: String!) {
+              workDetail(url: $url) {
+                playList {
+                  url
+                  name
+                }
+                image
+              }
+            }
+          `,
+          variables: {
+            url: item.url,
+          },
+        }),
+      );
       if (res.playList.length) {
         const work = Object.assign(item, res);
         setWork(work);

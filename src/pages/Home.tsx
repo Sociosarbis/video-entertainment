@@ -15,6 +15,8 @@ import { GlobalContext, GlobalContextValue } from '../contexts';
 import { PlayerContext, Player } from '../hooks/usePlayer';
 import { DBContext } from '../contexts/db';
 import { omit } from '../utils/obj';
+import { useApolloClient } from 'react-apollo';
+import { gql } from 'apollo-boost';
 
 const urlRegExp = /([a-zA-Z0-9]+:)?\/*?([^#?/:]+)(:\d+)?([^:#?]*?)(\?[^#]*)?(#.*)?$/;
 
@@ -65,6 +67,8 @@ function Home() {
     },
     [setOpen, player],
   );
+
+  const client = useApolloClient();
 
   const [inputValue, setInputValue] = useState('');
 
@@ -148,7 +152,26 @@ function Home() {
           value="搜索影片"
           onClick={async () => {
             if (!inputValue.trim()) return showMessage('影片名称不可为空');
-            const res = await withLoading(workApis.findWorks(inputValue));
+            const {
+              data: { works: res },
+            } = await withLoading(
+              client.query<{ works: Work[] }>({
+                query: gql`
+                  query FindWorks($keyword: String!) {
+                    works(keyword: $keyword) {
+                      name
+                      cate
+                      tag
+                      utime
+                      url
+                    }
+                  }
+                `,
+                variables: {
+                  keyword: inputValue,
+                },
+              }),
+            );
             setWorkList(res);
             setOpen(true);
           }}
