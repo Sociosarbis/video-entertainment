@@ -57,7 +57,7 @@ registerRoute(
 // precache, in this case same-origin .png requests like those from in public/
 registerRoute(
   // Add in any other file extensions or routing criteria as needed.
-  ({ url }: { url: Location }) =>
+  ({ url }: { url: URL }) =>
     url.pathname.endsWith('.png') || url.pathname.endsWith('.jpg'),
   // Customize this strategy as needed, e.g., by changing to CacheFirst.
   new StaleWhileRevalidate({
