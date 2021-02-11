@@ -13,8 +13,7 @@ import {
   makeStyles,
 } from '@material-ui/core';
 import { useBaseStyles } from '../styles/base';
-import { DBContext } from '../contexts/db';
-import { FindWorksResponse } from '../apis/work';
+import workApis, { GetHistoryFromDBResult } from '../apis/work';
 import { PlayerContext, Player } from '../hooks/usePlayer';
 import useMount from '../hooks/useMount';
 
@@ -25,30 +24,18 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export type HistoryItem = {
-  url: string;
-  chap: string;
-  utime: number;
-  work: FindWorksResponse[0] & { image: string };
-};
-
 export default function History() {
   const baseClasses = useBaseStyles({});
   const player = useContext(PlayerContext) as Player;
   const classes = useStyles({});
-  const db = useContext(DBContext);
-  const [items, setItems] = useState<HistoryItem[]>([]);
+  const [items, setItems] = useState<GetHistoryFromDBResult[]>([]);
   const history = useHistory<any>();
   useMount(
     {
       setItems,
-      db,
     },
-    async ({ setItems, db }) => {
-      const items = await db.getRange('history', 0, 10, {
-        index: 'utime',
-        order: 'prev',
-      });
+    async ({ setItems }) => {
+      const items = await workApis.getHistoryFromDB(0, 10);
       setItems(items);
     },
   );

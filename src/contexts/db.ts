@@ -1,17 +1,8 @@
 import { createContext } from 'react';
-import SoDB, { Table } from '../utils/indexDB';
-import { HistoryItem } from '../pages/History';
+import SoDB from '../utils/indexDB';
 
-const tables: Table[] = [
-  {
-    name: 'history',
-    indices: [
-      {
-        name: 'utime',
-        keyPath: 'utime',
-      },
-    ],
-  },
-];
+const db = new SoDB('main', 3);
 
-export const DBContext = createContext(new SoDB<HistoryItem>('main', tables));
+const DBContext = createContext(db);
+
+export { db, DBContext };

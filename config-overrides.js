@@ -6,7 +6,7 @@ const publicPath =
     ? process.env.NETLIFY
       ? '/'
       : '/tempExhibit/'
-    : '';
+    : '/';
 
 process.env.PUBLIC_URL = publicPath;
 

@@ -9,12 +9,12 @@ import Hls from 'hls.js';
 import PlayList from '../components/PlayList';
 import { useListDialog } from '../components/ListDialog';
 import { WorkDetail } from '../components/WorkDetail';
-import workApis, { FindWorksResponse } from '../apis/work';
+import workApis, { FindWorksResponse, HistoryItem, Work } from '../apis/work';
 import { ListItemText, Grid, makeStyles } from '@material-ui/core';
 import { GlobalContext, GlobalContextValue } from '../contexts';
 import { PlayerContext, Player } from '../hooks/usePlayer';
-import useMount from '../hooks/useMount';
 import { DBContext } from '../contexts/db';
+import { omit } from '../utils/obj';
 
 const urlRegExp = /([a-zA-Z0-9]+:)?\/*?([^#?/:]+)(:\d+)?([^:#?]*?)(\?[^#]*)?(#.*)?$/;
 
@@ -87,19 +87,18 @@ function Home() {
         if (player.work) {
           const chap = player.work.playList.find((item) => item.url === url);
           if (chap) {
-            db.set('history', url, {
-              url,
-              utime: Math.floor(new Date().valueOf() / 1000),
-              chap: chap.name,
-              work: {
-                name: player.work.name,
-                cate: player.work.cate,
-                tag: player.work.tag,
-                utime: player.work.utime,
-                url: player.work.url,
-                image: player.work.image,
-              },
-            });
+            db.set<Omit<Work, 'playList'>>(
+              'work',
+              player.work.url,
+              omit(player.work, ['playList']),
+            ).then(() =>
+              db.set<HistoryItem>('history', url, {
+                url,
+                utime: Math.floor(new Date().valueOf() / 1000),
+                chap: chap.name,
+                workUrl: (player.work as Work).url,
+              }),
+            );
           }
         }
         if (/\.m3u8/.test(url)) {
@@ -125,28 +124,6 @@ function Home() {
     });
     hlsRef.current = hls;
   }, []);
-
-  useMount(
-    {
-      player,
-      db,
-      handlePlay,
-    },
-    async ({ db, player, handlePlay }) => {
-      /*try {
-        const items = await db.getRange('history', 0, 1, {
-          index: 'utime',
-          order: 'prev',
-        });
-        if (items.length) {
-          await player.selectPlayList(items[0].work);
-          handlePlay(items[0].url);
-        }
-      } catch {
-        //
-      }*/
-    },
-  );
 
   return (
     <Grid
