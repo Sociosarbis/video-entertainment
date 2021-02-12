@@ -1,6 +1,6 @@
 import React from 'react';
 import cls from 'classnames';
-import { Route, useHistory } from 'react-router-dom';
+import { Route, useHistory, useLocation } from 'react-router-dom';
 import { CSSTransition } from 'react-transition-group';
 import { CustomThemeProvider } from './CustomThemeProvider';
 import { useLoading } from './components/Loading';
@@ -9,7 +9,7 @@ import { BottomNavigation, BottomNavigationAction } from '@material-ui/core';
 import Home from './pages/Home';
 import History from './pages/History';
 import Calendar from './pages/Calendar';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles, Typography } from '@material-ui/core';
 import { GlobalContext } from './contexts';
 import { useBaseStyles } from './styles/base';
 import usePlayer, { PlayerContext } from './hooks/usePlayer';
@@ -62,13 +62,14 @@ function MainApp() {
 
 function App() {
   const { showMessage, Message } = useMessage();
-  const { withLoading, Loading } = useLoading();
+  const { withLoading, Loading, setLoading } = useLoading();
   const classes = useStyles({});
   const baseClasses = useBaseStyles({});
   const history = useHistory<any>();
+  const location = useLocation<any>();
   return (
     <CustomThemeProvider>
-      <GlobalContext.Provider value={{ showMessage, withLoading }}>
+      <GlobalContext.Provider value={{ showMessage, withLoading, setLoading }}>
         <MainApp />
       </GlobalContext.Provider>
       <BottomNavigation
@@ -83,8 +84,13 @@ function App() {
           return (
             <BottomNavigationAction
               key={i}
-              classes={{ root: classes.bottomItem }}
-              label={item[0]}
+              classes={{
+                root: cls(
+                  classes.bottomItem,
+                  location.pathname === item[1] ? baseClasses.container : '',
+                ),
+              }}
+              label={<Typography variant="h6">{item[0]}</Typography>}
               onClick={() => history.replace(item[1])}
             ></BottomNavigationAction>
           );

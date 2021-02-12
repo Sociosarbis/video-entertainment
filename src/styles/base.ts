@@ -19,6 +19,15 @@ const useBaseStyles = makeStyles((theme) => ({
   flexNone: {
     flex: 'none',
   },
+  flex1: {
+    flex: 1,
+  },
+  column: {
+    flexDirection: 'column',
+  },
+  flex: {
+    display: 'flex',
+  },
 }));
 
 export { useBaseStyles };

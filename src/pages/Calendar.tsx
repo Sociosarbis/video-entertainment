@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useContext } from 'react';
 import { gql } from 'apollo-boost';
 import { useQuery } from 'react-apollo';
 import { useBaseStyles } from '../styles/base';
@@ -8,12 +8,14 @@ import {
   Card,
   CardMedia,
   CardHeader,
+  CardActionArea,
   Paper,
   makeStyles,
   Typography,
   CardContent,
 } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
+import { GlobalContext, GlobalContextValue } from '../contexts';
 
 const Query = gql`
   query Calendar {
@@ -52,6 +54,18 @@ const useStyles = makeStyles({
     height: '150px',
     margin: '0 auto',
   },
+  card: {
+    width: '150px',
+  },
+  cardHeader: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+  cardHeaderContent: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+  cardHeaderTitle: {},
 });
 
 const palettes = [
@@ -74,10 +88,12 @@ export default function Calendar() {
   const { data, loading } = useQuery<{ calendar: Data }>(Query);
   const baseClasses = useBaseStyles();
   const classes = useStyles();
+  const { setLoading } = useContext(GlobalContext) as GlobalContextValue;
   const history = useHistory<any>();
-  return loading || !data ? (
-    <div className={baseClasses.primary}>加载中</div>
-  ) : (
+  useEffect(() => {
+    setLoading(loading);
+  }, [loading]);
+  return (
     <div
       className={cls(
         'bottom-navigation-page overflow-auto',
@@ -85,60 +101,81 @@ export default function Calendar() {
       )}
     >
       <Paper square classes={{ root: baseClasses.container }}>
-        {data.calendar.map((day, i) => {
-          return (
-            <Grid
-              container
-              direction="row"
-              key={i}
-              classes={{ root: classes.weekDay }}
-            >
-              <Card
-                square
-                raised
+        {data ? (
+          data.calendar.map((day, i) => {
+            return (
+              <Grid
+                container
+                direction="row"
                 key={i}
-                classes={{
-                  root: baseClasses.flexNone,
-                }}
-                style={{ backgroundColor: palettes[i], color: '#fff' }}
+                classes={{ root: classes.weekDay }}
               >
-                <CardContent>
-                  <Typography variant="h5">{day.text}</Typography>
-                </CardContent>
-              </Card>
-              {day.items.map((item, j) => {
-                return (
-                  <Card
-                    square
-                    key={j}
-                    onClick={() => {
-                      history.push(`/?search=${item.name}`);
-                    }}
-                    classes={{
-                      root: baseClasses.flexNone,
-                    }}
-                    style={{ backgroundColor: palettes[i], color: '#fff' }}
-                  >
-                    <CardHeader
-                      title={item.name}
-                      titleTypographyProps={{ variant: 'inherit' }}
-                      subheaderTypographyProps={{ variant: 'inherit' }}
-                      subheader={
-                        <SubHeader
-                          text={!item.score ? '无评分' : `评分：${item.score}`}
-                        ></SubHeader>
-                      }
-                    ></CardHeader>
-                    <CardMedia
-                      classes={{ root: classes.image }}
-                      image={item.image}
-                    ></CardMedia>
-                  </Card>
-                );
-              })}
-            </Grid>
-          );
-        })}
+                <Card
+                  square
+                  raised
+                  key={i}
+                  classes={{
+                    root: baseClasses.flexNone,
+                  }}
+                  style={{ backgroundColor: palettes[i], color: '#fff' }}
+                >
+                  <CardContent>
+                    <Typography variant="h5">{day.text}</Typography>
+                  </CardContent>
+                </Card>
+                {day.items.map((item, j) => {
+                  return (
+                    <Card
+                      square
+                      key={j}
+                      onClick={() => {
+                        history.push(`/?search=${item.name}`);
+                      }}
+                      classes={{
+                        root: cls(baseClasses.flexNone, classes.card),
+                      }}
+                      style={{ backgroundColor: palettes[i], color: '#fff' }}
+                    >
+                      <CardActionArea className="h-full">
+                        <Grid container className="h-full" direction="column">
+                          <CardHeader
+                            classes={{
+                              root: cls(baseClasses.flex1, baseClasses.column),
+                              content: cls(
+                                baseClasses.column,
+                                baseClasses.flex,
+                                'w-full',
+                              ),
+                              title: baseClasses.flex1,
+                            }}
+                            title={item.name}
+                            titleTypographyProps={{ variant: 'inherit' }}
+                            subheaderTypographyProps={{ variant: 'inherit' }}
+                            subheader={
+                              <SubHeader
+                                text={
+                                  !item.score ? '无评分' : `评分：${item.score}`
+                                }
+                              ></SubHeader>
+                            }
+                          ></CardHeader>
+                          <CardMedia
+                            classes={{ root: classes.image }}
+                            image={item.image}
+                          ></CardMedia>
+                        </Grid>
+                      </CardActionArea>
+                    </Card>
+                  );
+                })}
+              </Grid>
+            );
+          })
+        ) : !loading ? (
+          <Card>
+            <Typography>无有效数据</Typography>
+          </Card>
+        ) : null}
       </Paper>
     </div>
   );
