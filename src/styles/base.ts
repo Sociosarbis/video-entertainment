@@ -16,6 +16,9 @@ const useBaseStyles = makeStyles((theme) => ({
   row: {
     padding: '10px 20px',
   },
+  flexNone: {
+    flex: 'none',
+  },
 }));
 
 export { useBaseStyles };

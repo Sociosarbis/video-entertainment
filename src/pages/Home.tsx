@@ -9,13 +9,14 @@ import Hls from 'hls.js';
 import PlayList from '../components/PlayList';
 import { useListDialog } from '../components/ListDialog';
 import { WorkDetail } from '../components/WorkDetail';
-import workApis, { FindWorksResponse, HistoryItem, Work } from '../apis/work';
+import { FindWorksResponse, HistoryItem, Work } from '../apis/work';
 import { ListItemText, Grid, makeStyles } from '@material-ui/core';
 import { GlobalContext, GlobalContextValue } from '../contexts';
 import { PlayerContext, Player } from '../hooks/usePlayer';
 import { DBContext } from '../contexts/db';
 import { omit } from '../utils/obj';
 import { useApolloClient } from 'react-apollo';
+import { useLocation } from 'react-router-dom';
 import { gql } from 'apollo-boost';
 
 const urlRegExp = /([a-zA-Z0-9]+:)?\/*?([^#?/:]+)(:\d+)?([^:#?]*?)(\?[^#]*)?(#.*)?$/;
@@ -56,6 +57,7 @@ function Home() {
   const [workList, setWorkList] = useState<FindWorksResponse>([]);
   const player = useContext(PlayerContext) as Player;
   const db = useContext(DBContext);
+  const location = useLocation<any>();
   const { setOpen, ListDialog } = useListDialog();
   const { showMessage, withLoading } = useContext(
     GlobalContext,
@@ -129,6 +131,13 @@ function Home() {
     hlsRef.current = hls;
   }, []);
 
+  useEffect(() => {
+    const text = new URLSearchParams(location.search).get('search');
+    if (text) {
+      setInputValue(text);
+    }
+  }, [location.search]);
+
   return (
     <Grid
       container
@@ -142,6 +151,7 @@ function Home() {
         className="w-full mb-2 bg-black input"
         id="url-input"
         placeholder="影片名称"
+        value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
       />
       <div className="mb-2">
@@ -151,6 +161,23 @@ function Home() {
           type="button"
           value="搜索影片"
           onClick={async () => {
+            client.query({
+              query: gql`
+                query Calendar {
+                  calendar {
+                    num
+                    text
+                    items {
+                      id
+                      name
+                      score
+                      image
+                      summary
+                    }
+                  }
+                }
+              `,
+            });
             if (!inputValue.trim()) return showMessage('影片名称不可为空');
             const {
               data: { works: res },

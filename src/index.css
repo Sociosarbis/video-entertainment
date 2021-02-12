@@ -774,3 +774,7 @@ html {
 .slide-up-enter-active {
   transform: translate3d(0, 0, 0);
 }
+
+.text-white {
+  color: #fff;
+}

@@ -8,6 +8,7 @@ import { useMessage } from './components/Message';
 import { BottomNavigation, BottomNavigationAction } from '@material-ui/core';
 import Home from './pages/Home';
 import History from './pages/History';
+import Calendar from './pages/Calendar';
 import { makeStyles } from '@material-ui/core';
 import { GlobalContext } from './contexts';
 import { useBaseStyles } from './styles/base';
@@ -42,6 +43,19 @@ function MainApp() {
           </CSSTransition>
         )}
       </Route>
+      <Route path="/calendar">
+        {({ match }) => (
+          <CSSTransition
+            in={match != null}
+            classNames="slide-up"
+            timeout={{ enter: 250, exit: 200 }}
+            mountOnEnter={true}
+            unmountOnExit={true}
+          >
+            <Calendar />
+          </CSSTransition>
+        )}
+      </Route>
     </PlayerContext.Provider>
   );
 }
@@ -64,6 +78,7 @@ function App() {
         {[
           ['播放', '/'],
           ['历史', '/history'],
+          ['每日放送', '/calendar'],
         ].map((item, i) => {
           return (
             <BottomNavigationAction
