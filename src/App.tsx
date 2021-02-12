@@ -13,6 +13,8 @@ import { makeStyles, Typography } from '@material-ui/core';
 import { GlobalContext } from './contexts';
 import { useBaseStyles } from './styles/base';
 import usePlayer, { PlayerContext } from './hooks/usePlayer';
+import useMount from './hooks/useMount';
+import { register } from './serviceWorker';
 
 const useStyles = makeStyles(() => ({
   bottom: {
@@ -67,6 +69,18 @@ function App() {
   const baseClasses = useBaseStyles({});
   const history = useHistory<any>();
   const location = useLocation<any>();
+  useMount(
+    {
+      register,
+    },
+    ({ register }) => {
+      register({
+        onUpdate: () => {
+          showMessage('检测到新版本，请彻底退出浏览器后重新启动！');
+        },
+      });
+    },
+  );
   return (
     <CustomThemeProvider>
       <GlobalContext.Provider value={{ showMessage, withLoading, setLoading }}>

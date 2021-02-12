@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import { register } from './serviceWorker';
 import { BrowserRouter } from 'react-router-dom';
 import { ApolloProvider } from 'react-apollo';
 import ApolloClient from 'apollo-boost';
@@ -19,5 +18,3 @@ ReactDOM.render(
   </ApolloProvider>,
   document.getElementById('root'),
 );
-
-register({});

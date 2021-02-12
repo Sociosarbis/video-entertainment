@@ -1,11 +1,7 @@
 import { ApolloServer, gql } from 'apollo-server-lambda';
 import { resolve as resolveWorks } from './resolvers/works';
 import { resolve as resolveWorkDetail } from './resolvers/workDetail';
-import {
-  resolve as resolveCalendar,
-  Response as CalendarResponse,
-} from './resolvers/calendar';
-import { resolve as resolveSubjectDetail } from './resolvers/subjectDetail';
+import { resolve as resolveCalendar } from './resolvers/calendar';
 
 const typeDefs = gql`
   type Resource {
