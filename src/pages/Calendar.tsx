@@ -16,6 +16,7 @@ import {
 } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 import { GlobalContext, GlobalContextValue } from '../contexts';
+import img404 from '../assets/images/404.png';
 
 const Query = gql`
   query Calendar {
@@ -161,7 +162,7 @@ export default function Calendar() {
                           ></CardHeader>
                           <CardMedia
                             classes={{ root: classes.image }}
-                            image={item.image}
+                            image={item.image || img404}
                           ></CardMedia>
                         </Grid>
                       </CardActionArea>
@@ -172,9 +173,9 @@ export default function Calendar() {
             );
           })
         ) : !loading ? (
-          <Card>
+          <CardContent classes={{ root: 'text-center' }}>
             <Typography>无有效数据</Typography>
-          </Card>
+          </CardContent>
         ) : null}
       </Paper>
     </div>

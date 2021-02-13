@@ -35,7 +35,7 @@ export async function resolve() {
             id: work.id,
             name: work.name_cn || work.name,
             score: work.rating && work.rating.score,
-            image: work.images.common,
+            image: (work.images && work.images.common) || '',
           };
         })
         .sort((a, b) => (b.score as number) - (a.score as number)),
