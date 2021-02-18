@@ -161,23 +161,6 @@ function Home() {
           type="button"
           value="搜索影片"
           onClick={async () => {
-            client.query({
-              query: gql`
-                query Calendar {
-                  calendar {
-                    num
-                    text
-                    items {
-                      id
-                      name
-                      score
-                      image
-                      summary
-                    }
-                  }
-                }
-              `,
-            });
             if (!inputValue.trim()) return showMessage('影片名称不可为空');
             const {
               data: { works: res },

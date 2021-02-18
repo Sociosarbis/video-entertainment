@@ -1,8 +1,13 @@
 import axios from 'axios';
 
-export default axios.create(/*{
+export default axios.create({
+  /*
   proxy: {
     host: '127.0.0.1',
-    port: 10809,
+    port: 8899,
+  },*/
+  headers: {
+    'User-Agent':
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36 Edg/88.0.705.68',
   },
-}*/);
+});

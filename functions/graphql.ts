@@ -2,6 +2,8 @@ import { ApolloServer, gql } from 'apollo-server-lambda';
 import { resolve as resolveWorks } from './resolvers/works';
 import { resolve as resolveWorkDetail } from './resolvers/workDetail';
 import { resolve as resolveCalendar } from './resolvers/calendar';
+import { resolve as resolveEpisodeTopic } from './resolvers/episodeTopic';
+import { parse } from './helpers/cookie';
 
 const typeDefs = gql`
   type Resource {
@@ -41,6 +43,33 @@ const typeDefs = gql`
     works(keyword: String!): [Work!]
     workDetail(url: String!): WorkDetail
     calendar: [BGMWeekDay!]
+    episodeTopic(id: Int!): EpisodeTopic
+  }
+
+  type Author {
+    name: String
+    id: Int
+    msg: String
+    avatar: String
+  }
+
+  type Qoute {
+    from: String
+    text: String
+  }
+
+  type Comment {
+    id: Int
+    floor: String
+    qoute: Qoute
+    time: String
+    text: String
+    author: Author
+    replies: [Comment!]
+  }
+
+  type EpisodeTopic {
+    comments: [Comment!]
   }
 `;
 
@@ -57,12 +86,20 @@ const server = new ApolloServer({
       async calendar() {
         return await resolveCalendar();
       },
+      async episodeTopic(_, args, context) {
+        return await resolveEpisodeTopic(args.id, context.cookie);
+      },
     },
     Work: {
       async detail(parent) {
         return await resolveWorkDetail({ url: parent.url });
       },
     },
+  },
+  context: (info) => {
+    return {
+      cookie: parse(info.event.headers.cookie),
+    };
   },
 });
 
