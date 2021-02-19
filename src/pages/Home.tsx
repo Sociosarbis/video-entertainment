@@ -161,6 +161,46 @@ function Home() {
           type="button"
           value="搜索影片"
           onClick={async () => {
+            /*await client.query({
+              query: gql`
+                query GetEpisodeTopic($id: Int!) {
+                  episodeTopic(id: $id) {
+                    comments {
+                      id
+                      floor
+                      time
+                      text
+                      author {
+                        name
+                        id
+                        msg
+                        avatar
+                      }
+                      replies {
+                        id
+                        floor
+                        time
+                        text
+                        quote {
+                          from
+                          text
+                        }
+                        author {
+                          name
+                          id
+                          msg
+                          avatar
+                        }
+                      }
+                    }
+                  }
+                }
+              `,
+              variables: {
+                id: 994900,
+              },
+            });
+            return;*/
             if (!inputValue.trim()) return showMessage('影片名称不可为空');
             const {
               data: { works: res },

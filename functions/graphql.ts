@@ -53,7 +53,7 @@ const typeDefs = gql`
     avatar: String
   }
 
-  type Qoute {
+  type Quote {
     from: String
     text: String
   }
@@ -61,7 +61,7 @@ const typeDefs = gql`
   type Comment {
     id: Int
     floor: String
-    qoute: Qoute
+    quote: Quote
     time: String
     text: String
     author: Author

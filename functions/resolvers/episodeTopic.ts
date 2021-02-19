@@ -1,7 +1,6 @@
 import axios from '../helpers/axios';
-import { readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
 import cheerio from 'cheerio';
+import { concatPath, hasProtocol } from '../helpers/concatPath';
 
 type EpisodeTopic = {
   comments: string[];
@@ -11,6 +10,12 @@ const BASE_URL = 'https://bgm.tv';
 
 function extractURLFromUrl(value: string) {
   return value.replace(/url\((["'])(.*)\1\)/, '$2');
+}
+
+function fixURL(url: string, baseURL: string) {
+  if (hasProtocol(url)) return url;
+  if (url.startsWith('//')) return `https:${url}`;
+  return concatPath(baseURL, url);
 }
 
 function extractSubReply(value: string) {
@@ -70,15 +75,18 @@ function extractPostInfo($post: Cheerio, isReply: boolean): PostInfo {
   const id = Number(($post.attr('id') || '').split('_')[1] || 0);
   const floor = $post.find('.floor-anchor').first().text().replace(/#/, '');
   const time = $post.find('.re_info').first().text().split(' - ')[1].trim();
-  const $author = $post.find(`.post_author_${id}`);
+  const $author = isReply
+    ? $post.find(`#${id}`)
+    : $post.find(`.post_author_${id}`);
   const $cmtBtn = $post.find('.icons_cmt');
   const { postUId } = extractSubReply($cmtBtn.attr('onclick') || '');
   const author = {
     name: $author.text(),
     id: postUId,
     msg: $post.find('.tip_j').text(),
-    avatar: extractURLFromUrl(
-      $post.find('.avatarNeue').css('background-image'),
+    avatar: fixURL(
+      extractURLFromUrl($post.find('.avatarNeue').css('background-image')),
+      'https://bgm.tv/ep/',
     ),
   };
   const ret = {
@@ -89,12 +97,12 @@ function extractPostInfo($post: Cheerio, isReply: boolean): PostInfo {
     author,
   } as PostInfo;
   if (isReply) {
-    const $qoute = $post.find('.quote');
+    const $quote = $post.find('.quote');
     ret.text = $post.find('.cmt_sub_content').text().trim();
-    if ($qoute.length) {
-      const from = $qoute.children().eq(0).children().eq(0).text();
+    if ($quote.length) {
+      const from = $quote.children().eq(0).children().eq(0).text();
       if (from) {
-        const qouteText = $qoute.text().trim();
+        const qouteText = $quote.text().trim();
         ret.text = ret.text.substring(qouteText.length).trim();
         const text = qouteText
           .substring(from.length)
