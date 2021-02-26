@@ -117,6 +117,7 @@ const server = new ApolloServer({
     },
   },
   context: (info) => {
+    console.log(info.event.headers);
     return {
       cookie: parse(info.event.headers.cookie),
     };
