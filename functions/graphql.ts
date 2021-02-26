@@ -1,4 +1,5 @@
-import { ApolloServer, gql } from 'apollo-server-lambda';
+import { ApolloServer, gql, GraphQLExtension } from 'apollo-server-lambda';
+import { print } from 'graphql';
 import { resolve as resolveWorks } from './resolvers/works';
 import { resolve as resolveWorkDetail } from './resolvers/workDetail';
 import { resolve as resolveCalendar } from './resolvers/calendar';
@@ -73,6 +74,25 @@ const typeDefs = gql`
   }
 `;
 
+type ExtensionProto = typeof GraphQLExtension.prototype;
+class BasicLogging {
+  requestDidStart({
+    queryString,
+    parsedQuery,
+    variables,
+  }: Parameters<ExtensionProto['requestDidStart']>[0]) {
+    const query = queryString || print(parsedQuery);
+    console.log(query);
+    console.log(variables);
+  }
+
+  willSendResponse({
+    graphqlResponse,
+  }: Parameters<ExtensionProto['willSendResponse']>[0]) {
+    console.log(JSON.stringify(graphqlResponse, null, 2));
+  }
+}
+
 const server = new ApolloServer({
   typeDefs,
   resolvers: {
@@ -101,6 +121,7 @@ const server = new ApolloServer({
       cookie: parse(info.event.headers.cookie),
     };
   },
+  extensions: [() => new BasicLogging()],
 });
 
 const handler = server.createHandler();

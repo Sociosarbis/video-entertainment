@@ -76,8 +76,8 @@ function extractPostInfo($post: Cheerio, isReply: boolean): PostInfo {
   const floor = $post.find('.floor-anchor').first().text().replace(/#/, '');
   const time = $post.find('.re_info').first().text().split(' - ')[1].trim();
   const $author = isReply
-    ? $post.find(`#${id}`)
-    : $post.find(`.post_author_${id}`);
+    ? $post.find(`#${id}`).first()
+    : $post.find(`.post_author_${id}`).first();
   const $cmtBtn = $post.find('.icons_cmt');
   const { postUId } = extractSubReply($cmtBtn.attr('onclick') || '');
   const author = {
@@ -85,7 +85,9 @@ function extractPostInfo($post: Cheerio, isReply: boolean): PostInfo {
     id: postUId,
     msg: $post.find('.tip_j').text(),
     avatar: fixURL(
-      extractURLFromUrl($post.find('.avatarNeue').css('background-image')),
+      extractURLFromUrl(
+        $post.find('.avatarNeue').first().css('background-image'),
+      ),
       'https://bgm.tv/ep/',
     ),
   };
