@@ -74,13 +74,13 @@ const typeDefs = gql`
   }
 `;
 
-type ExtensionProto = typeof GraphQLExtension.prototype;
+type ExtensionProto = Required<typeof GraphQLExtension.prototype>;
 class BasicLogging {
   requestDidStart({
     queryString,
     parsedQuery,
     variables,
-  }: Parameters<ExtensionProto['requestDidStart']>[0]) {
+  }: Required<Parameters<ExtensionProto['requestDidStart']>[0]>) {
     const query = queryString || print(parsedQuery);
     console.log(query);
     console.log(variables);
