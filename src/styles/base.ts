@@ -28,6 +28,21 @@ const useBaseStyles = makeStyles((theme) => ({
   flex: {
     display: 'flex',
   },
+  slideIn: {
+    transform: 'perspective(1px) translate3d(0, 0, 0)',
+  },
+  smallTransition: {
+    transition: '100ms transform ease-in',
+  },
+  slideDownOut: {
+    transform: 'perspective(1px) translate3d(0, -100%, 0)',
+  },
+  absolute: {
+    position: 'absolute',
+  },
+  zIndex1: {
+    zIndex: 1,
+  },
 }));
 
 export { useBaseStyles };

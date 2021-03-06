@@ -4,6 +4,7 @@ import React, {
   useRef,
   useEffect,
   useContext,
+  SyntheticEvent,
 } from 'react';
 import Hls from 'hls.js';
 import PlayList from '../components/PlayList';
@@ -18,6 +19,9 @@ import { omit } from '../utils/obj';
 import { useApolloClient } from 'react-apollo';
 import { useLocation } from 'react-router-dom';
 import { gql } from 'apollo-boost';
+import useSwipe from '../hooks/useSwipe';
+import cls from 'classnames';
+import { useBaseStyles } from '../styles/base';
 
 const urlRegExp = /([a-zA-Z0-9]+:)?\/*?([^#?/:]+)(:\d+)?([^:#?]*?)(\?[^#]*)?(#.*)?$/;
 
@@ -27,6 +31,18 @@ const useStyles = makeStyles((theme) => ({
   },
   secondary: {
     color: theme.palette.text.secondary,
+  },
+  padding: {
+    paddingTop: '64px',
+  },
+  search: {
+    position: 'absolute',
+    padding: '10px',
+    left: 0,
+    top: 0,
+    boxSizing: 'border-box',
+    width: '100%',
+    zIndex: 1,
   },
 }));
 
@@ -54,6 +70,7 @@ function WorkItem(item: FindWorksResponse[0]) {
 
 function Home() {
   const classes = useStyles({});
+  const baseClasses = useBaseStyles({});
   const [workList, setWorkList] = useState<FindWorksResponse>([]);
   const player = useContext(PlayerContext) as Player;
   const db = useContext(DBContext);
@@ -131,12 +148,39 @@ function Home() {
     hlsRef.current = hls;
   }, []);
 
+  const { onTouchStart, onTouchEnd, onSwipe } = useSwipe();
+
+  const [hideSearch, setHideSearch] = useState(false);
+
+  const onScroll = useCallback(
+    (e: SyntheticEvent) => {
+      if ((e.target as HTMLElement).scrollTop <= 64) {
+        setHideSearch(false);
+      }
+    },
+    [setHideSearch],
+  );
+
+  const container = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const text = new URLSearchParams(location.search).get('search');
     if (text) {
       setInputValue(text);
+      setHideSearch(false);
     }
   }, [location.search]);
+
+  onSwipe.current = useCallback((data) => {
+    if (data && container.current) {
+      if (data.y < -100 || data.velocity.y < -1) {
+        if (container.current.scrollTop <= 64) return;
+        setHideSearch(true);
+      } else if (data.y > 100 || data.velocity.y > 1) {
+        setHideSearch(false);
+      }
+    }
+  }, []);
 
   return (
     <Grid
@@ -146,88 +190,65 @@ function Home() {
         root: classes.page,
       }}
       className="bottom-navigation-page"
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
     >
-      <input
-        className="w-full mb-2 bg-black input"
-        id="url-input"
-        placeholder="影片名称"
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-      />
-      <div className="mb-2">
+      <div
+        className={cls([
+          !hideSearch ? baseClasses.slideIn : baseClasses.slideDownOut,
+          baseClasses.smallTransition,
+          'bg-canvas',
+          classes.search,
+        ])}
+      >
         <input
-          id="replace-video-button"
-          className="mr-1 btn"
-          type="button"
-          value="搜索影片"
-          onClick={async () => {
-            await client.query({
-              query: gql`
-                query GetEpisodeTopic($id: Int!) {
-                  episodeTopic(id: $id) {
-                    comments {
-                      id
-                      floor
-                      time
-                      text
-                      author {
-                        name
-                        id
-                        msg
-                        avatar
-                      }
-                      replies {
-                        id
-                        floor
-                        time
-                        text
-                        quote {
-                          from
-                          text
-                        }
-                        author {
-                          name
-                          id
-                          msg
-                          avatar
-                        }
-                      }
-                    }
-                  }
-                }
-              `,
-              variables: {
-                id: 994900,
-              },
-            });
-            return;
-            if (!inputValue.trim()) return showMessage('影片名称不可为空');
-            const {
-              data: { works: res },
-            } = await withLoading(
-              client.query<{ works: Work[] }>({
-                query: gql`
-                  query FindWorks($keyword: String!) {
-                    works(keyword: $keyword) {
-                      name
-                      cate
-                      tag
-                      utime
-                      url
-                    }
-                  }
-                `,
-                variables: {
-                  keyword: inputValue,
-                },
-              }),
-            );
-            setWorkList(res);
-            setOpen(true);
-          }}
+          className="w-full mb-2 bg-black input"
+          id="url-input"
+          placeholder="影片名称"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
         />
+        <div className="mb-2">
+          <input
+            id="replace-video-button"
+            className="mr-1 btn"
+            type="button"
+            value="搜索影片"
+            onClick={async () => {
+              if (!inputValue.trim()) return showMessage('影片名称不可为空');
+              const {
+                data: { works: res },
+              } = await withLoading(
+                client.query<{ works: Work[] }>({
+                  query: gql`
+                    query FindWorks($keyword: String!) {
+                      works(keyword: $keyword) {
+                        name
+                        cate
+                        tag
+                        utime
+                        url
+                      }
+                    }
+                  `,
+                  variables: {
+                    keyword: inputValue,
+                  },
+                }),
+              );
+              setWorkList(res);
+              setOpen(true);
+            }}
+          />
+        </div>
       </div>
-      <Grid item className="overflow-auto flex-1">
+      <Grid
+        item
+        component="div"
+        className={cls(classes.padding, 'overflow-auto', 'flex-1')}
+        onScroll={onScroll}
+        ref={container}
+      >
         <div className="text-center mb-2">
           <video
             className="w-full"
