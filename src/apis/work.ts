@@ -1,8 +1,13 @@
 import axios from 'axios';
+import ApolloClient, { gql } from 'apollo-boost';
 import { db } from '../contexts/db';
 
 const axiosInst = axios.create({
   baseURL: '.netlify/functions',
+});
+
+export const client = new ApolloClient({
+  uri: '/.netlify/functions/graphql',
 });
 
 axiosInst.interceptors.response.use((response) => {
@@ -11,11 +16,24 @@ axiosInst.interceptors.response.use((response) => {
 
 export type FindWorksResponse = {
   name: string;
+  keywords: string;
   cate: string;
   tag: string;
   utime: string;
   url: string;
 }[];
+
+export type FindBgmWorksResponse = (FindWorksResponse[0] & { id: number })[];
+
+export type GetBgmWorkDetailResponse = {
+  id: number;
+  eps: {
+    id: number;
+    name: string;
+    desc: string;
+    sort: number;
+  }[];
+};
 
 export type Resource = {
   name: string;
@@ -80,6 +98,51 @@ class WorkApis {
       .map((item) =>
         Object.assign(item, { work: workMap[item.workUrl] as Work }),
       );
+  }
+
+  async findBgmWork(keywords: string): Promise<FindBgmWorksResponse> {
+    return (
+      await client.query({
+        query: gql`
+          query FindBgmWork($keywords: String!) {
+            bgmWorks(keywords: $keywords) {
+              id
+              name
+              cate
+              tag
+              utime
+            }
+          }
+        `,
+        variables: {
+          keywords,
+        },
+      })
+    ).data.bgmWorks;
+  }
+
+  async getBgmWorkDetail(id: number): Promise<GetBgmWorkDetailResponse> {
+    return (
+      await client.query({
+        query: gql`
+          query GetBgmWorkDetail($id: Int!) {
+            subjectDetail(id: $id) {
+              id
+              eps {
+                id
+                name
+                desc
+                sort
+              }
+            }
+          }
+        `,
+        variables: {
+          id,
+        },
+        fetchPolicy: 'network-only',
+      })
+    ).data.subjectDetail;
   }
 }
 

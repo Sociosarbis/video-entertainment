@@ -43,6 +43,9 @@ const useBaseStyles = makeStyles((theme) => ({
   zIndex1: {
     zIndex: 1,
   },
+  flexGrow1: {
+    flexGrow: 1,
+  },
 }));
 
 export { useBaseStyles };

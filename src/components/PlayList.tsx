@@ -9,7 +9,7 @@ type PlayListProps = {
   work: Work | null;
 };
 
-const useStyle = makeStyles({
+export const useStyle = makeStyles({
   container: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',

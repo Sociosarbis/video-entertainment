@@ -4,11 +4,7 @@ import './index.css';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
 import { ApolloProvider } from 'react-apollo';
-import ApolloClient from 'apollo-boost';
-
-const client = new ApolloClient({
-  uri: '/.netlify/functions/graphql',
-});
+import { client } from './apis/work';
 
 ReactDOM.render(
   <ApolloProvider client={client}>

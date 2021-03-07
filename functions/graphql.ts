@@ -4,6 +4,8 @@ import { resolve as resolveWorks } from './resolvers/works';
 import { resolve as resolveWorkDetail } from './resolvers/workDetail';
 import { resolve as resolveCalendar } from './resolvers/calendar';
 import { resolve as resolveEpisodeTopic } from './resolvers/episodeTopic';
+import { resolve as resolveSubjectDetail } from './resolvers/subjectDetail';
+import { resolve as resolveBgmWorks } from './resolvers/searchBgmWorks';
 import { parse } from './helpers/cookie';
 
 const typeDefs = gql`
@@ -26,12 +28,28 @@ const typeDefs = gql`
     detail: WorkDetail
   }
 
+  type BgmWork {
+    id: Int
+    name: String
+    cate: String
+    tag: String
+    utime: String
+  }
+
   type BGMSubject {
     id: Int
     name: String
     score: Float
     image: String
     summary: String
+    eps: [BGMEp!]
+  }
+
+  type BGMEp {
+    id: Int!
+    name: String
+    desc: String
+    sort: Float
   }
 
   type BGMWeekDay {
@@ -45,6 +63,8 @@ const typeDefs = gql`
     workDetail(url: String!): WorkDetail
     calendar: [BGMWeekDay!]
     episodeTopic(id: Int!): EpisodeTopic
+    bgmWorks(keywords: String!, type: Int): [BgmWork!]
+    subjectDetail(id: Int!): BGMSubject
   }
 
   type Author {
@@ -100,11 +120,17 @@ const server = new ApolloServer({
       async works(_, args) {
         return await resolveWorks({ keyword: args.keyword });
       },
+      async bgmWorks(_, args) {
+        return await resolveBgmWorks(args.keywords, args.type);
+      },
       async workDetail(_, args) {
         return await resolveWorkDetail({ url: args.url });
       },
       async calendar() {
         return await resolveCalendar();
+      },
+      async subjectDetail(_, args) {
+        return await resolveSubjectDetail({ id: args.id });
       },
       async episodeTopic(_, args, context) {
         return await resolveEpisodeTopic(args.id, context.cookie);

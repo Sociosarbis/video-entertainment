@@ -5,13 +5,16 @@ import React, {
   useEffect,
   useContext,
   SyntheticEvent,
+  forwardRef,
+  MutableRefObject,
 } from 'react';
 import Hls from 'hls.js';
 import PlayList from '../components/PlayList';
 import { useListDialog } from '../components/ListDialog';
 import { WorkDetail } from '../components/WorkDetail';
+import WorkItem from '../components/WorkItem';
 import { FindWorksResponse, HistoryItem, Work } from '../apis/work';
-import { ListItemText, Grid, makeStyles } from '@material-ui/core';
+import { Grid, makeStyles } from '@material-ui/core';
 import { GlobalContext, GlobalContextValue } from '../contexts';
 import { PlayerContext, Player } from '../hooks/usePlayer';
 import { DBContext } from '../contexts/db';
@@ -25,12 +28,9 @@ import { useBaseStyles } from '../styles/base';
 
 const urlRegExp = /([a-zA-Z0-9]+:)?\/*?([^#?/:]+)(:\d+)?([^:#?]*?)(\?[^#]*)?(#.*)?$/;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   page: {
     padding: '10px 10px 60px 10px',
-  },
-  secondary: {
-    color: theme.palette.text.secondary,
   },
   padding: {
     paddingTop: '64px',
@@ -42,54 +42,77 @@ const useStyles = makeStyles((theme) => ({
     top: 0,
     boxSizing: 'border-box',
     width: '100%',
-    zIndex: 1,
   },
 }));
 
-function WorkItem(item: FindWorksResponse[0]) {
+type SearchRef = { setInputValue: (value: string) => any; inputValue: string };
+
+const Search = forwardRef<
+  SearchRef,
+  {
+    show: boolean;
+    onConfirm: (value: string) => any;
+  }
+>(({ show, onConfirm }, ref) => {
   const classes = useStyles({});
-  const customStyles = {
-    secondary: classes.secondary,
+  const baseClasses = useBaseStyles({});
+  const [inputValue, setInputValue] = useState('');
+  (ref as MutableRefObject<SearchRef>).current = {
+    setInputValue,
+    inputValue,
   };
   return (
-    <>
-      <ListItemText
-        classes={customStyles}
-        primary={item.name}
-        secondary={item.tag}
-      ></ListItemText>
-      <ListItemText
-        classes={customStyles}
-        className="text-right"
-        primary={item.cate}
-        secondary={item.utime}
-      ></ListItemText>
-    </>
+    <div
+      className={cls([
+        show ? baseClasses.slideIn : baseClasses.slideDownOut,
+        baseClasses.smallTransition,
+        'bg-canvas',
+        classes.search,
+      ])}
+    >
+      <input
+        className="w-full mb-2 bg-black input"
+        id="url-input"
+        placeholder="影片名称"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+      />
+      <div className="mb-2">
+        <input
+          id="replace-video-button"
+          className="mr-1 btn"
+          type="button"
+          value="搜索影片"
+          onClick={() => onConfirm(inputValue)}
+        />
+      </div>
+    </div>
   );
-}
+});
 
 function Home() {
   const classes = useStyles({});
-  const baseClasses = useBaseStyles({});
   const [workList, setWorkList] = useState<FindWorksResponse>([]);
   const player = useContext(PlayerContext) as Player;
   const db = useContext(DBContext);
   const location = useLocation<any>();
+  const searchRef = useRef<SearchRef>(null);
   const { setOpen, ListDialog } = useListDialog();
   const { showMessage, withLoading } = useContext(
     GlobalContext,
   ) as GlobalContextValue;
   const onSelectPlayList = useCallback(
     async (item: FindWorksResponse[0]) => {
+      if (searchRef.current) {
+        item.keywords = searchRef.current.inputValue;
+      }
       await player.selectPlayList(item);
       setOpen(false);
     },
-    [setOpen, player],
+    [setOpen, player, searchRef],
   );
 
   const client = useApolloClient();
-
-  const [inputValue, setInputValue] = useState('');
 
   const hlsRef = useRef<Hls | null>(null);
 
@@ -152,6 +175,35 @@ function Home() {
 
   const [hideSearch, setHideSearch] = useState(false);
 
+  const onConfirmSearch = useCallback(
+    async (value: string) => {
+      if (!value.trim()) return showMessage('影片名称不可为空');
+      const {
+        data: { works: res },
+      } = await withLoading(
+        client.query<{ works: Work[] }>({
+          query: gql`
+            query FindWorks($keyword: String!) {
+              works(keyword: $keyword) {
+                name
+                cate
+                tag
+                utime
+                url
+              }
+            }
+          `,
+          variables: {
+            keyword: value,
+          },
+        }),
+      );
+      setWorkList(res);
+      setOpen(true);
+    },
+    [setOpen, setWorkList, client, withLoading, showMessage],
+  );
+
   const onScroll = useCallback(
     (e: SyntheticEvent) => {
       if ((e.target as HTMLElement).scrollTop <= 64) {
@@ -166,17 +218,19 @@ function Home() {
   useEffect(() => {
     const text = new URLSearchParams(location.search).get('search');
     if (text) {
-      setInputValue(text);
+      if (searchRef.current) {
+        searchRef.current.setInputValue(text);
+      }
       setHideSearch(false);
     }
-  }, [location.search]);
+  }, [location.search, searchRef]);
 
   onSwipe.current = useCallback((data) => {
     if (data && container.current) {
-      if (data.y < -100 || data.velocity.y < -1) {
+      if (data.y < -200) {
         if (container.current.scrollTop <= 64) return;
         setHideSearch(true);
-      } else if (data.y > 100 || data.velocity.y > 1) {
+      } else if (data.y > 200) {
         setHideSearch(false);
       }
     }
@@ -193,55 +247,6 @@ function Home() {
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      <div
-        className={cls([
-          !hideSearch ? baseClasses.slideIn : baseClasses.slideDownOut,
-          baseClasses.smallTransition,
-          'bg-canvas',
-          classes.search,
-        ])}
-      >
-        <input
-          className="w-full mb-2 bg-black input"
-          id="url-input"
-          placeholder="影片名称"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-        />
-        <div className="mb-2">
-          <input
-            id="replace-video-button"
-            className="mr-1 btn"
-            type="button"
-            value="搜索影片"
-            onClick={async () => {
-              if (!inputValue.trim()) return showMessage('影片名称不可为空');
-              const {
-                data: { works: res },
-              } = await withLoading(
-                client.query<{ works: Work[] }>({
-                  query: gql`
-                    query FindWorks($keyword: String!) {
-                      works(keyword: $keyword) {
-                        name
-                        cate
-                        tag
-                        utime
-                        url
-                      }
-                    }
-                  `,
-                  variables: {
-                    keyword: inputValue,
-                  },
-                }),
-              );
-              setWorkList(res);
-              setOpen(true);
-            }}
-          />
-        </div>
-      </div>
       <Grid
         item
         component="div"
@@ -260,7 +265,11 @@ function Home() {
         </div>
         {player.work ? (
           <>
-            <WorkDetail poster={player.work.image} name={player.work.name} />
+            <WorkDetail
+              poster={player.work.image}
+              name={player.work.name}
+              keywords={player.work.keywords}
+            />
             <PlayList
               currentUrl={player.videoUrl}
               work={player.work}
@@ -269,6 +278,7 @@ function Home() {
           </>
         ) : null}
       </Grid>
+      <Search show={!hideSearch} onConfirm={onConfirmSearch} ref={searchRef} />
       <ListDialog
         list={workList}
         title="搜索结果"

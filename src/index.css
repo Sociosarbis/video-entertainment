@@ -778,3 +778,7 @@ html {
 .text-white {
   color: #fff;
 }
+
+.leading-normal {
+  line-height: 1.5;
+}
