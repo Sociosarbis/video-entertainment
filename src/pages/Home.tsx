@@ -7,6 +7,7 @@ import React, {
   SyntheticEvent,
   forwardRef,
   MutableRefObject,
+  useReducer,
 } from 'react';
 import Hls from 'hls.js';
 import PlayList from '../components/PlayList';
@@ -22,7 +23,6 @@ import { omit } from '../utils/obj';
 import { useApolloClient } from 'react-apollo';
 import { useLocation } from 'react-router-dom';
 import { gql } from 'apollo-boost';
-import useSwipe from '../hooks/useSwipe';
 import cls from 'classnames';
 import { useBaseStyles } from '../styles/base';
 
@@ -45,30 +45,61 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-type SearchRef = { setInputValue: (value: string) => any; inputValue: string };
+type SearchRef = {
+  setInputValue: (value: string) => any;
+  inputValue: string;
+  changeOffset: (change: number) => any;
+};
 
 const Search = forwardRef<
   SearchRef,
   {
-    show: boolean;
     onConfirm: (value: string) => any;
+    children: React.ReactNode;
+    onChangeHeight: (height: number) => any;
   }
->(({ show, onConfirm }, ref) => {
+>(({ onConfirm, children, onChangeHeight }, ref) => {
   const classes = useStyles({});
   const baseClasses = useBaseStyles({});
+  const rootRef = useRef<HTMLDivElement>(null);
+  const heightRef = useRef<number>(0);
+  useEffect(() => {
+    const observer = new ResizeObserver((entries: ResizeObserverEntry[]) => {
+      for (const e of entries) {
+        heightRef.current = (e.target as HTMLElement).offsetHeight;
+        onChangeHeight(heightRef.current);
+      }
+    });
+    if (rootRef.current) {
+      observer.observe(rootRef.current);
+      heightRef.current = rootRef.current.offsetHeight;
+      onChangeHeight(heightRef.current);
+    }
+    return () => observer.disconnect();
+  }, [rootRef, heightRef, onChangeHeight]);
+  const [offset, changeOffset] = useReducer(
+    (state: number, delta: number): number => {
+      return Math.max(Math.min(0, state + delta), -74);
+    },
+    0,
+  );
   const [inputValue, setInputValue] = useState('');
   (ref as MutableRefObject<SearchRef>).current = {
     setInputValue,
     inputValue,
+    changeOffset,
   };
   return (
     <div
+      ref={rootRef}
       className={cls([
-        show ? baseClasses.slideIn : baseClasses.slideDownOut,
         baseClasses.smallTransition,
         'bg-canvas',
         classes.search,
       ])}
+      style={{
+        transform: `perspective(1px) translate3d(0, ${offset}px, 0)`,
+      }}
     >
       <input
         className="w-full mb-2 bg-black input"
@@ -86,6 +117,7 @@ const Search = forwardRef<
           onClick={() => onConfirm(inputValue)}
         />
       </div>
+      {children}
     </div>
   );
 });
@@ -171,10 +203,6 @@ function Home() {
     hlsRef.current = hls;
   }, []);
 
-  const { onTouchStart, onTouchEnd, onSwipe } = useSwipe();
-
-  const [hideSearch, setHideSearch] = useState(false);
-
   const onConfirmSearch = useCallback(
     async (value: string) => {
       if (!value.trim()) return showMessage('影片名称不可为空');
@@ -204,14 +232,18 @@ function Home() {
     [setOpen, setWorkList, client, withLoading, showMessage],
   );
 
-  const onScroll = useCallback(
-    (e: SyntheticEvent) => {
-      if ((e.target as HTMLElement).scrollTop <= 64) {
-        setHideSearch(false);
-      }
-    },
-    [setHideSearch],
-  );
+  const [padding, setPadding] = useState(74);
+
+  const scrollRef = useRef<number>(0);
+
+  const onScroll = useCallback((e: SyntheticEvent) => {
+    const scrollTop = (e.target as HTMLElement).scrollTop;
+    const diff = scrollRef.current - scrollTop;
+    if (searchRef.current) {
+      searchRef.current.changeOffset(diff);
+    }
+    scrollRef.current = scrollTop;
+  }, []);
 
   const container = useRef<HTMLDivElement>(null);
 
@@ -221,20 +253,8 @@ function Home() {
       if (searchRef.current) {
         searchRef.current.setInputValue(text);
       }
-      setHideSearch(false);
     }
   }, [location.search, searchRef]);
-
-  onSwipe.current = useCallback((data) => {
-    if (data && container.current) {
-      if (data.y < -200) {
-        if (container.current.scrollTop <= 64) return;
-        setHideSearch(true);
-      } else if (data.y > 200) {
-        setHideSearch(false);
-      }
-    }
-  }, []);
 
   return (
     <Grid
@@ -244,25 +264,15 @@ function Home() {
         root: classes.page,
       }}
       className="bottom-navigation-page"
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
     >
       <Grid
         item
         component="div"
-        className={cls(classes.padding, 'overflow-auto', 'flex-1')}
+        className={cls('overflow-auto', 'flex-1')}
         onScroll={onScroll}
+        style={{ paddingTop: `${padding}px` }}
         ref={container}
       >
-        <div className="text-center mb-2">
-          <video
-            className="w-full"
-            id="player"
-            ref={playerRef}
-            controls={true}
-            crossOrigin="anonymous"
-          ></video>
-        </div>
         {player.work ? (
           <>
             <WorkDetail
@@ -278,7 +288,21 @@ function Home() {
           </>
         ) : null}
       </Grid>
-      <Search show={!hideSearch} onConfirm={onConfirmSearch} ref={searchRef} />
+      <Search
+        onConfirm={onConfirmSearch}
+        ref={searchRef}
+        onChangeHeight={setPadding}
+      >
+        <div className="text-center mb-2">
+          <video
+            className="w-full"
+            id="player"
+            ref={playerRef}
+            controls={true}
+            crossOrigin="anonymous"
+          ></video>
+        </div>
+      </Search>
       <ListDialog
         list={workList}
         title="搜索结果"

@@ -19,7 +19,10 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react",
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "types": [
+      "resize-observer-browser"
+    ]
   },
   "include": [
     "src"

@@ -139,13 +139,11 @@ export function WorkDetail({ poster, name, keywords }: Props) {
             </CardContent>
           </Grid>
           {eps.length ? (
-            <div className={playListClasses.scroller}>
-              <div className={playListClasses.container}>
-                {eps.map((item, i) => (
-                  <Episode key={i} item={item} />
-                ))}
-                <span />
-              </div>
+            <div className={playListClasses.container}>
+              {eps.map((item, i) => (
+                <Episode key={i} item={item} />
+              ))}
+              <span />
             </div>
           ) : null}
         </Card>

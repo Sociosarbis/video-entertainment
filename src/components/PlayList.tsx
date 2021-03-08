@@ -16,10 +16,6 @@ export const useStyle = makeStyles({
     gridRowGap: '10px',
     gridColumnGap: '5px',
   },
-  scroller: {
-    height: '300px',
-    overflow: 'auto',
-  },
 });
 
 export default function PlayList(props: PlayListProps) {
@@ -35,22 +31,20 @@ export default function PlayList(props: PlayListProps) {
   );
 
   return work ? (
-    <div className={classes.scroller}>
-      <div className={classes.container}>
-        {work.playList.map((item, i) => (
-          <input
-            key={i}
-            className={cls([
-              'btn',
-              item.url === currentUrl ? 'btn_selected' : '',
-            ])}
-            type="button"
-            value={item.name}
-            onClick={() => handleSelect(item)}
-          />
-        ))}
-        <span />
-      </div>
+    <div className={classes.container}>
+      {work.playList.map((item, i) => (
+        <input
+          key={i}
+          className={cls([
+            'btn',
+            item.url === currentUrl ? 'btn_selected' : '',
+          ])}
+          type="button"
+          value={item.name}
+          onClick={() => handleSelect(item)}
+        />
+      ))}
+      <span />
     </div>
   ) : null;
 }
