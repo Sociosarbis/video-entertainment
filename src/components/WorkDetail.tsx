@@ -50,14 +50,24 @@ function Episode({ item }: { item: GetBgmWorkDetailResponse['eps'][0] }) {
       open={open}
       disableHoverListener
       disableTouchListener
+      interactive
       onClose={() => {
         setOpen(false);
       }}
       title={
         item.name || item.desc ? (
-          <div className="leading-normal" onClick={() => setOpen(true)}>
+          <div className="leading-normal">
             <div className="mb-2">{item.name}</div>
             <div>{item.desc}</div>
+            <Button
+              component="a"
+              variant="contained"
+              color="primary"
+              fullWidth
+              href={`flutterboilerplate://episodeTopic?id=${item.id}`}
+            >
+              跳转评论区
+            </Button>
           </div>
         ) : (
           ''
@@ -128,7 +138,7 @@ export function WorkDetail({ poster, name, keywords }: Props) {
             <CardContent classes={{ root: baseClasses.flexGrow1 }}>
               <Typography variant="h6">{name}</Typography>
               <Button variant="contained" color="primary" onClick={findBgmWork}>
-                评论
+                评论章节
               </Button>
               <ListDialog
                 list={workList}
