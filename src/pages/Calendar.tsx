@@ -6,7 +6,6 @@ import cls from 'classnames';
 import {
   Grid,
   Card,
-  CardMedia,
   CardHeader,
   CardActionArea,
   Paper,
@@ -17,6 +16,7 @@ import {
 import { useHistory } from 'react-router-dom';
 import { GlobalContext, GlobalContextValue } from '../contexts';
 import img404 from '../assets/images/404.png';
+import FadeInImage from '../components/FadeInImage';
 
 const Query = gql`
   query Calendar {
@@ -160,10 +160,10 @@ export default function Calendar() {
                               ></SubHeader>
                             }
                           ></CardHeader>
-                          <CardMedia
+                          <FadeInImage
+                            src={item.image || img404}
                             classes={{ root: classes.image }}
-                            image={item.image || img404}
-                          ></CardMedia>
+                          />
                         </Grid>
                       </CardActionArea>
                     </Card>

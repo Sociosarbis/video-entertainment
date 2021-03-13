@@ -10,7 +10,6 @@ import {
   ExpansionPanelDetails,
   ExpansionPanelSummary,
   Card,
-  CardMedia,
   CardContent,
   Typography,
   Grid,
@@ -24,6 +23,7 @@ import workApis, {
 } from '../apis/work';
 
 import { makeStyles } from '@material-ui/core';
+import FadeInImage from '../components/FadeInImage';
 
 type Props = {
   poster: string;
@@ -39,6 +39,10 @@ const useStyles = makeStyles((theme) => ({
   poster: {
     width: '150px',
     height: '200px',
+    flexGrow: 1,
+  },
+  poster__wrapper: {
+    display: 'flex',
     flexGrow: 1,
   },
 }));
@@ -65,6 +69,7 @@ function Episode({ item }: { item: GetBgmWorkDetailResponse['eps'][0] }) {
               color="primary"
               fullWidth
               href={`flutterboilerplate://episodeTopic?id=${item.id}`}
+              target="_blank"
             >
               跳转评论区
             </Button>
@@ -130,10 +135,13 @@ export function WorkDetail({ poster, name, keywords }: Props) {
         >
           <Grid container direction="row">
             {poster ? (
-              <CardMedia
-                classes={{ root: classes.poster }}
-                image={poster}
-              ></CardMedia>
+              <FadeInImage
+                classes={{
+                  root: classes.poster,
+                  wrapper: classes.poster__wrapper,
+                }}
+                src={poster}
+              />
             ) : null}
             <CardContent classes={{ root: baseClasses.flexGrow1 }}>
               <Typography variant="h6">{name}</Typography>

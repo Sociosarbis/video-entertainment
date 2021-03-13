@@ -9,13 +9,13 @@ import {
   Typography,
   Grid,
   Card,
-  CardMedia,
   makeStyles,
 } from '@material-ui/core';
 import { useBaseStyles } from '../styles/base';
 import workApis, { GetHistoryFromDBResult } from '../apis/work';
 import { PlayerContext, Player } from '../hooks/usePlayer';
 import useMount from '../hooks/useMount';
+import FadeInImage from '../components/FadeInImage';
 
 const useStyles = makeStyles(() => ({
   workImage: {
@@ -64,10 +64,10 @@ export default function History() {
                   }}
                 >
                   <Card className="mr-2">
-                    <CardMedia
+                    <FadeInImage
                       classes={{ root: classes.workImage }}
-                      image={item.work.image}
-                    ></CardMedia>
+                      src={item.work.image}
+                    />
                   </Card>
                   <ListItemText
                     primary={item.work.name}
