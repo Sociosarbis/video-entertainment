@@ -24,15 +24,17 @@ const useStyles = makeStyles(() => ({
 export default function FadeInImage({ src, classes, ...rest }: Props) {
   const [loaded, setLoaded] = useState(false);
   const styles = useStyles();
+  const { wrapper, ...restClasses } = classes;
+  delete classes.wrapper;
   return (
-    <div className={cls(styles.root, classes.wrapper)}>
+    <div className={cls(styles.root, wrapper)}>
       <CardMedia
         {...rest}
         classes={merge(
           {
             root: cls(styles.img, loaded ? styles.img_loaded : ''),
           },
-          classes,
+          restClasses,
         )}
         component="img"
         src={src}

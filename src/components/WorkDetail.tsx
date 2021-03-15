@@ -15,6 +15,7 @@ import {
   Grid,
   Button,
   Tooltip,
+  Divider,
 } from '@material-ui/core';
 import { useApolloClient } from 'react-apollo';
 import workApis, {
@@ -41,6 +42,10 @@ const useStyles = makeStyles((theme) => ({
     height: '200px',
     flexGrow: 1,
   },
+  divider: {
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    margin: '5px 0',
+  },
   poster__wrapper: {
     display: 'flex',
     flexGrow: 1,
@@ -49,6 +54,7 @@ const useStyles = makeStyles((theme) => ({
 
 function Episode({ item }: { item: GetBgmWorkDetailResponse['eps'][0] }) {
   const [open, setOpen] = useState(false);
+  const classes = useStyles();
   return (
     <Tooltip
       open={open}
@@ -61,8 +67,16 @@ function Episode({ item }: { item: GetBgmWorkDetailResponse['eps'][0] }) {
       title={
         item.name || item.desc ? (
           <div className="leading-normal">
-            <div className="mb-2">{item.name}</div>
+            <Typography variant="h5">{item.name}</Typography>
+            <Divider classes={{ root: classes.divider }} />
             <div>{item.desc}</div>
+            <Divider classes={{ root: classes.divider }} />
+            <div>
+              {item.airdate ? (
+                <div className="float-left">放送日期：{item.airdate}</div>
+              ) : null}
+              <div className="float-right">评论：(+{item.comment})</div>
+            </div>
             <Button
               component="a"
               variant="contained"

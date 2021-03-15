@@ -50,6 +50,8 @@ const typeDefs = gql`
     name: String
     desc: String
     sort: Float
+    comment: Int
+    airdate: String
   }
 
   type BGMWeekDay {

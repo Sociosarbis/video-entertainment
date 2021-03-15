@@ -782,3 +782,11 @@ html {
 .leading-normal {
   line-height: 1.5;
 }
+
+.float-left {
+  float: left;
+}
+
+.float-right {
+  float: right;
+}

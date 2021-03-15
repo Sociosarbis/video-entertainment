@@ -17,6 +17,8 @@ type Response = {
     name: string;
     name_cn?: string;
     desc: string;
+    comment: number;
+    airdate: string;
     sort: number;
   }[];
 };
@@ -27,7 +29,6 @@ export async function resolve({ id }: { id: number }) {
       baseURL: BASE_URL,
     })
   ).data;
-  console.log(work);
   return {
     id: work.id,
     name: work.name_cn,

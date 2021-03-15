@@ -32,6 +32,8 @@ export type GetBgmWorkDetailResponse = {
     name: string;
     desc: string;
     sort: number;
+    comment: number;
+    airdate: string;
   }[];
 };
 
@@ -133,6 +135,8 @@ class WorkApis {
                 name
                 desc
                 sort
+                airdate
+                comment
               }
             }
           }
@@ -140,7 +144,6 @@ class WorkApis {
         variables: {
           id,
         },
-        fetchPolicy: 'network-only',
       })
     ).data.subjectDetail;
   }
