@@ -32,14 +32,14 @@ export default function usePlayer(): Player {
   const client = useApolloClient();
   const selectPlayList = useCallback(
     async (item: FindWorksResponse[0]) => {
-      if (work && item.url === work.url) return;
+      if (work && item.id === work.id) return;
       const {
         data: { workDetail: res },
       } = await withLoading(
         client.query({
           query: gql`
-            query GetPlayList($url: String!) {
-              workDetail(url: $url) {
+            query GetPlayList($id: Int!) {
+              workDetail(id: $id) {
                 playList {
                   url
                   name
@@ -49,7 +49,7 @@ export default function usePlayer(): Player {
             }
           `,
           variables: {
-            url: item.url,
+            id: item.id,
           },
         }),
       );

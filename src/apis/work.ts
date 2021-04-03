@@ -20,7 +20,7 @@ export type FindWorksResponse = {
   cate: string;
   tag: string;
   utime: string;
-  url: string;
+  id: number;
 }[];
 
 export type FindBgmWorksResponse = (FindWorksResponse[0] & { id: number })[];
@@ -51,7 +51,7 @@ export type HistoryItem = {
   url: string;
   chap: string;
   utime: number;
-  workUrl: string;
+  id: number;
 };
 
 export type Work = FindWorksResponse[0] & GetPlayListResponse;
@@ -66,16 +66,16 @@ class WorkApis {
     });
   }
 
-  async getPlayList(url: string): Promise<GetPlayListResponse> {
+  async getPlayList(id: number): Promise<GetPlayListResponse> {
     return await axiosInst.get<any, any>('getPlayList', {
       params: {
-        url,
+        id,
       },
     });
   }
 
-  async getWorkFromDB(url: string) {
-    return await db.get<Work>('work', url);
+  async getWorkFromDB(id: number) {
+    return await db.get<Work>('work', String(id));
   }
 
   async getHistoryFromDB(offset: number, size: number) {
@@ -84,8 +84,8 @@ class WorkApis {
       order: 'prev',
     });
     const workMap = items.reduce((acc, item) => {
-      if (item.workUrl) {
-        acc[item.workUrl] = null;
+      if (item.id) {
+        acc[item.id] = null;
       }
       return acc;
     }, {} as Record<string, Work | null>);
@@ -96,10 +96,8 @@ class WorkApis {
       }
     }
     return items
-      .filter((item) => workMap[item.workUrl])
-      .map((item) =>
-        Object.assign(item, { work: workMap[item.workUrl] as Work }),
-      );
+      .filter((item) => workMap[item.id])
+      .map((item) => Object.assign(item, { work: workMap[item.id] as Work }));
   }
 
   async findBgmWork(keywords: string): Promise<FindBgmWorksResponse> {

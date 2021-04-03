@@ -1,49 +1,40 @@
 import axios from '../helpers/axios';
-import cheerio from 'cheerio';
 
-const API_URL = 'http://www.zuidazy3.net/index.php?m=vod-search';
+const API_URL = 'https://api.okzy.tv/api.php/provide/vod/at/json/';
 
 type Result = {
   name: string;
   cate: string;
   tag: string;
   utime: string;
-  url: string;
+  id: number;
+};
+
+type Input = {
+  list: {
+    vod_name: string;
+    type_name: string;
+    vod_remarks: string;
+    vod_time: string;
+    vod_id: number;
+  }[];
 };
 
 export async function resolve({ keyword }: { keyword: string }) {
   const page = (
-    await axios.post<string>(
-      API_URL,
-      new URLSearchParams({
+    await axios.get<Input>(API_URL, {
+      params: {
         wd: keyword,
-        submit: 'search',
-      }).toString(),
-    )
+        ac: 'list',
+      },
+    })
   ).data;
-  const $ = cheerio.load(page);
-  const $results = $('.xing_vb > ul');
-  const res: Result[] = [];
-  for (let i = 0; i < $results.length; i++) {
-    const $item = $results.eq(i);
-    const $desc = $item.find('.xing_vb4').children('a');
-    if ($desc.length) {
-      const tag = $desc.children().first().text().trim();
-      const name = $desc
-        .text()
-        .trim()
-        .slice(0, tag.length === 0 ? undefined : -tag.length);
-      const url = $desc.attr('href') || '';
-      const utime = $item.find('.xing_vb6').text().trim();
-      const cate = $item.find('.xing_vb5').text().trim();
-      res.push({
-        name,
-        tag,
-        url,
-        utime,
-        cate,
-      });
-    }
-  }
+  const res: Result[] = page.list.map((item) => ({
+    name: item.vod_name,
+    cate: item.type_name,
+    tag: item.vod_remarks,
+    utime: item.vod_time,
+    id: item.vod_id,
+  }));
   return res;
 }

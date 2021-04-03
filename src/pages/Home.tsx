@@ -167,14 +167,14 @@ function Home() {
           if (chap) {
             db.set<Omit<Work, 'playList'>>(
               'work',
-              player.work.url,
+              String(player.work.id),
               omit(player.work, ['playList']),
             ).then(() =>
               db.set<HistoryItem>('history', url, {
                 url,
                 utime: Math.floor(new Date().valueOf() / 1000),
                 chap: chap.name,
-                workUrl: (player.work as Work).url,
+                id: (player.work as Work).id,
               }),
             );
           }
@@ -217,7 +217,7 @@ function Home() {
                 cate
                 tag
                 utime
-                url
+                id
               }
             }
           `,

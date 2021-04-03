@@ -24,7 +24,7 @@ const typeDefs = gql`
     cate: String
     tag: String
     utime: String
-    url: String
+    id: Int
     detail: WorkDetail
   }
 
@@ -62,7 +62,7 @@ const typeDefs = gql`
 
   type Query {
     works(keyword: String!): [Work!]
-    workDetail(url: String!): WorkDetail
+    workDetail(id: Int!): WorkDetail
     calendar: [BGMWeekDay!]
     episodeTopic(id: Int!): EpisodeTopic
     bgmWorks(keywords: String!, type: Int): [BgmWork!]
@@ -126,7 +126,7 @@ const server = new ApolloServer({
         return await resolveBgmWorks(args.keywords, args.type);
       },
       async workDetail(_, args) {
-        return await resolveWorkDetail({ url: args.url });
+        return await resolveWorkDetail({ id: args.id });
       },
       async calendar() {
         return await resolveCalendar();
@@ -140,7 +140,7 @@ const server = new ApolloServer({
     },
     Work: {
       async detail(parent) {
-        return await resolveWorkDetail({ url: parent.url });
+        return await resolveWorkDetail({ id: parent.id });
       },
     },
   },

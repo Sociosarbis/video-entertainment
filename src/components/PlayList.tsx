@@ -30,7 +30,7 @@ export default function PlayList(props: PlayListProps) {
 
   const handleSelect = useCallback(
     (item: Resource) => {
-      window.localStorage.setItem(`PREV_CHAP$${work?.url}`, item.url);
+      window.localStorage.setItem(`PREV_CHAP$${work?.id}`, item.url);
       onSelect(item.url);
     },
     [onSelect, work],
