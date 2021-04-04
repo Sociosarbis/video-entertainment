@@ -1,4 +1,7 @@
-import axios from '../helpers/axios';
+import axios, {
+  HunanDNSServers,
+  ExtendedRequestConfig,
+} from '../helpers/axios';
 
 const API_URL = 'https://api.okzy.tv/api.php/provide/vod/at/json/';
 
@@ -27,7 +30,8 @@ export async function resolve({ keyword }: { keyword: string }) {
         wd: keyword,
         ac: 'list',
       },
-    })
+      DNSServers: HunanDNSServers,
+    } as ExtendedRequestConfig)
   ).data;
   const res: Result[] = page.list.map((item) => ({
     name: item.vod_name,
