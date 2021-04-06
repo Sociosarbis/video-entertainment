@@ -1,9 +1,6 @@
-import axios, {
-  HunanDNSServers,
-  ExtendedRequestConfig,
-} from '../helpers/axios';
+import axios from '../helpers/axios';
 
-const BASE_URL = 'https://api.okzy.tv/api.php/provide/vod/at/json/';
+const BASE_URL = 'https://141.193.159.69/api.php/provide/vod/at/json/';
 
 type Resource = {
   name: string;
@@ -26,8 +23,10 @@ export async function resolve({ id }: { id: number }) {
         ac: 'detail',
         ids: id,
       },
-      DNSServers: HunanDNSServers,
-    } as ExtendedRequestConfig)
+      headers: {
+        Host: 'api.okzy.tv',
+      },
+    })
   ).data;
   const res: Result = {
     playList: [],
