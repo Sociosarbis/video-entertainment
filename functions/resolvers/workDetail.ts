@@ -1,6 +1,6 @@
 import axios from '../helpers/axios';
 
-const BASE_URL = 'https://141.193.159.69/api.php/provide/vod/at/json/';
+const BASE_URL = 'https://www.mhapi123.com/inc/api_mac10.php';
 
 type Resource = {
   name: string;
@@ -22,9 +22,6 @@ export async function resolve({ id }: { id: number }) {
       params: {
         ac: 'detail',
         ids: id,
-      },
-      headers: {
-        Host: 'api.okzy.tv',
       },
     })
   ).data;

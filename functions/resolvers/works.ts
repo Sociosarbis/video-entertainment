@@ -1,6 +1,6 @@
 import axios from '../helpers/axios';
 
-const API_URL = 'https://141.193.159.69/api.php/provide/vod/at/json/';
+const API_URL = 'https://www.mhapi123.com/inc/api_mac10.php';
 
 type Result = {
   name: string;
@@ -26,9 +26,6 @@ export async function resolve({ keyword }: { keyword: string }) {
       params: {
         wd: keyword,
         ac: 'list',
-      },
-      headers: {
-        Host: 'api.okzy.tv',
       },
     })
   ).data;
