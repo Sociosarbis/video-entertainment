@@ -1,4 +1,10 @@
-import React, { useCallback, useState, useContext, useEffect } from 'react';
+import React, {
+  useCallback,
+  useState,
+  useContext,
+  useEffect,
+  createContext,
+} from 'react';
 import WorkItem from './WorkItem';
 import { useListDialog } from './ListDialog';
 import { GlobalContext, GlobalContextValue } from '../contexts';
@@ -55,6 +61,7 @@ const useStyles = makeStyles((theme) => ({
 function Episode({ item }: { item: GetBgmWorkDetailResponse['eps'][0] }) {
   const [open, setOpen] = useState(false);
   const classes = useStyles();
+  const workId = useContext<number>(WorkIdContext);
   return (
     <Tooltip
       open={open}
@@ -82,7 +89,7 @@ function Episode({ item }: { item: GetBgmWorkDetailResponse['eps'][0] }) {
               variant="contained"
               color="primary"
               fullWidth
-              href={`flutterboilerplate://episodeTopic?id=${item.id}`}
+              href={`flutterboilerplate://episodeTopic?id=${item.id}&subject_id=${workId}`}
               target="_blank"
             >
               跳转评论区
@@ -103,11 +110,14 @@ function Episode({ item }: { item: GetBgmWorkDetailResponse['eps'][0] }) {
   );
 }
 
+const WorkIdContext = createContext(0);
+
 export function WorkDetail({ poster, name, keywords }: Props) {
   const classes = useStyles({});
   const playListClasses = usePlayListStyles({});
   const baseClasses = useBaseStyles();
   const client = useApolloClient();
+  const [workId, setWorkId] = useState(0);
   const [workList, setWorkList] = useState<FindBgmWorksResponse>([]);
   const { setOpen, ListDialog } = useListDialog();
   const [eps, setEps] = useState<GetBgmWorkDetailResponse['eps']>([]);
@@ -121,6 +131,7 @@ export function WorkDetail({ poster, name, keywords }: Props) {
     setEps([]);
   }, [name]);
   const confirmWork = useCallback(async (work: FindBgmWorksResponse[0]) => {
+    setWorkId(work.id);
     const { eps } = await withLoading(workApis.getBgmWorkDetail(work.id));
     setEps(eps);
     setOpen(false);
@@ -170,14 +181,16 @@ export function WorkDetail({ poster, name, keywords }: Props) {
               />
             </CardContent>
           </Grid>
-          {eps.length ? (
-            <div className={playListClasses.container}>
-              {eps.map((item, i) => (
-                <Episode key={i} item={item} />
-              ))}
-              <span />
-            </div>
-          ) : null}
+          <WorkIdContext.Provider value={workId}>
+            {eps.length ? (
+              <div className={playListClasses.container}>
+                {eps.map((item, i) => (
+                  <Episode key={i} item={item} />
+                ))}
+                <span />
+              </div>
+            ) : null}
+          </WorkIdContext.Provider>
         </Card>
       </ExpansionPanelDetails>
     </ExpansionPanel>
