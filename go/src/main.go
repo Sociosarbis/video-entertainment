@@ -29,6 +29,6 @@ func main() {
 			return
 		}
 		grpcWebServer.ServeHTTP(w, req)
-	}))
+	}).ProxyWithContext)
 
 }
