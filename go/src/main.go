@@ -2,28 +2,33 @@ package main
 
 import (
 	"log"
-	"net"
+	"net/http"
 
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/awslabs/aws-lambda-go-api-proxy/handlerfunc"
+	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/sociosarbis/grpc/proto/book"
 	"github.com/sociosarbis/grpc/src/service"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 func main() {
 	log.Printf("starting container")
-	port := "8070"
-	lis, err := net.Listen("tcp", ":"+port)
-	if err != nil {
-		log.Printf("Got error: %+v", err)
-	}
-
 	bookServiceServer := service.NewBookService()
 	grpcServer := grpc.NewServer()
+	grpcWebServer := grpcweb.WrapServer(grpcServer)
 	book.RegisterBookServiceServer(grpcServer, *bookServiceServer)
-	reflection.Register((grpcServer))
+	log.Printf("starting lambda")
+	lambda.Start(handlerfunc.NewV2(func(w http.ResponseWriter, req *http.Request) {
+		header := w.Header()
+		header.Set("Access-Control-Allow-Origin", "*")
+		header.Set("Access-Control-Allow-Methods", "*")
+		header.Set("Access-Control-Allow-Headers", "*")
+		if req.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		grpcWebServer.ServeHTTP(w, req)
+	}))
 
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Println("got an error", err)
-	}
 }
