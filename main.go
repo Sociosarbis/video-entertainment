@@ -7,17 +7,17 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/awslabs/aws-lambda-go-api-proxy/handlerfunc"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
-	"github.com/sociosarbis/grpc/proto/book"
-	"github.com/sociosarbis/grpc/src/service"
+	bookPb "github.com/sociosarbis/grpc/go/proto/book"
+	"github.com/sociosarbis/grpc/go/src/service"
 	"google.golang.org/grpc"
 )
 
 func main() {
 	log.Printf("starting container")
-	bookServiceServer := service.NewBookService()
+	bookService := service.NewBookService()
 	grpcServer := grpc.NewServer()
 	grpcWebServer := grpcweb.WrapServer(grpcServer)
-	book.RegisterBookServiceServer(grpcServer, *bookServiceServer)
+	bookPb.RegisterBookServiceServer(grpcServer, *bookService)
 	log.Printf("starting lambda")
 	lambda.Start(handlerfunc.NewV2(func(w http.ResponseWriter, req *http.Request) {
 		header := w.Header()
