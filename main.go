@@ -20,6 +20,7 @@ func main() {
 	bookPb.RegisterBookServiceServer(grpcServer, *bookService)
 	log.Printf("starting lambda")
 	lambda.Start(handlerfunc.NewV2(func(w http.ResponseWriter, req *http.Request) {
+		log.Printf("%+v", req.RequestURI)
 		header := w.Header()
 		header.Set("Access-Control-Allow-Origin", "*")
 		header.Set("Access-Control-Allow-Methods", "*")
