@@ -25,7 +25,7 @@ func main() {
 		header := w.Header()
 		proxyPath := req.Header.Get("X-Grpc-Method")
 		req.Method = http.MethodPost
-		if len(proxyPath) == 0 {
+		if len(proxyPath) != 0 {
 			req.URL.Path = proxyPath
 		}
 		if data, err := json.MarshalIndent(req.URL, "", "  "); err == nil {
