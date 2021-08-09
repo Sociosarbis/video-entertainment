@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -20,7 +21,13 @@ func main() {
 	bookPb.RegisterBookServiceServer(grpcServer, *bookService)
 	log.Printf("starting lambda")
 	lambda.Start(handlerfunc.NewV2(func(w http.ResponseWriter, req *http.Request) {
-		log.Printf("%s %s %s\n", req.RemoteAddr, req.Method, req.URL)
+		log.Printf("%s %s\n", req.RemoteAddr, req.Method)
+		if data, err := json.MarshalIndent(req.URL, "", "  "); err == nil {
+			log.Printf("URL：%s", string(data))
+		}
+		if data, err := json.MarshalIndent(req.Header, "", "  "); err == nil {
+			log.Printf("Header：%s", string(data))
+		}
 		header := w.Header()
 		header.Set("Access-Control-Allow-Origin", "*")
 		header.Set("Access-Control-Allow-Methods", "*")
