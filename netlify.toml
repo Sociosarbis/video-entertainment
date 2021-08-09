@@ -6,7 +6,3 @@
   GO111MODULE = "on"
 [dev]
   functions = "netlify/functions"
-[[redirects]]
-  from = "/book.BookService/*"
-  to = "/.netlify/functions/grpc"
-  status = 200
