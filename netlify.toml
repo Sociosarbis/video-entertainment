@@ -8,5 +8,5 @@
   functions = "netlify/functions"
 [[redirects]]
   from = "/book.BookService/*"
-  to = "/.netlify/functions/grpc"
+  to = "https://sociosarbis-media-player.netlify.app/.netlify/functions/grpc"
   status = 200

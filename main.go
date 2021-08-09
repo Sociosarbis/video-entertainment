@@ -22,13 +22,18 @@ func main() {
 	log.Printf("starting lambda")
 	lambda.Start(handlerfunc.NewV2(func(w http.ResponseWriter, req *http.Request) {
 		log.Printf("%s %s\n", req.RemoteAddr, req.Method)
+		header := w.Header()
+		proxyPath := req.Header.Get("X-Grpc-Method")
+		req.Method = http.MethodPost
+		if len(proxyPath) == 0 {
+			req.URL.Path = proxyPath
+		}
 		if data, err := json.MarshalIndent(req.URL, "", "  "); err == nil {
 			log.Printf("URL：%s", string(data))
 		}
 		if data, err := json.MarshalIndent(req.Header, "", "  "); err == nil {
 			log.Printf("Header：%s", string(data))
 		}
-		header := w.Header()
 		header.Set("Access-Control-Allow-Origin", "*")
 		header.Set("Access-Control-Allow-Methods", "*")
 		header.Set("Access-Control-Allow-Headers", "*")
