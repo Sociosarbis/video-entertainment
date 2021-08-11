@@ -20,7 +20,7 @@ func main() {
 	grpcWebServer := grpcweb.WrapServer(grpcServer)
 	bookPb.RegisterBookServiceServer(grpcServer, *bookService)
 	log.Printf("starting lambda")
-	lambda.Start(handlerfunc.NewV2(func(w http.ResponseWriter, req *http.Request) {
+	lambda.Start(handlerfunc.New((func(w http.ResponseWriter, req *http.Request) {
 		log.Printf("%s %s\n", req.RemoteAddr, req.Method)
 		header := w.Header()
 		proxyPath := req.Header.Get("X-Grpc-Method")
@@ -42,6 +42,6 @@ func main() {
 			return
 		}
 		grpcWebServer.ServeHTTP(w, req)
-	}).ProxyWithContext)
+	})).ProxyWithContext)
 
 }

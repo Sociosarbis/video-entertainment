@@ -28,7 +28,7 @@
   "scripts": {
     "start": "react-app-rewired start",
     "build:function": "tsc --build tsconfig.function.json",
-    "build:go": "go build -o netlify/functions/grpc main.go",
+    "build:go": "go build -o netlify/functions/ ./go/cmd/...",
     "build": "react-app-rewired build && yarn build:function && yarn build:go",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
