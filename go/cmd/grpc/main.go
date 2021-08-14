@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -28,6 +30,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.Printf("%s %s\n", req.RemoteAddr, req.Method)
 	header := w.Header()
 	proxyPath := req.Header.Get("X-Grpc-Method")
+	body, err := ioutil.ReadAll(req.Body)
+	if err == nil {
+		log.Printf("body(%v): %s", len(body), string(body))
+	} else {
+		panic(err)
+	}
+	req.Body.Close()
+	req.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 	if len(proxyPath) != 0 {
 		req.URL.Path = proxyPath
 	}
