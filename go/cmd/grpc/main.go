@@ -24,7 +24,6 @@ func main() {
 		log.Printf("%s %s\n", req.RemoteAddr, req.Method)
 		header := w.Header()
 		proxyPath := req.Header.Get("X-Grpc-Method")
-		req.Method = http.MethodPost
 		if len(proxyPath) != 0 {
 			req.URL.Path = proxyPath
 		}
