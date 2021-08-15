@@ -8,6 +8,9 @@ import (
 	"net/http"
 	"os"
 
+	"context"
+
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/awslabs/aws-lambda-go-api-proxy/handlerfunc"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
@@ -72,6 +75,9 @@ func main() {
 		}
 		return
 	}
-	lambda.Start(handlerfunc.New(h.ServeHTTP).ProxyWithContext)
+	lambda.Start(func(ctx context.Context, event events.APIGatewayProxyRequest) {
+		log.Printf("raw body(%v;encoded:%v): %s(%v)", len([]byte(event.Body)), event.IsBase64Encoded, event.Body, len(event.Body))
+		handlerfunc.New(h.ServeHTTP).ProxyWithContext(ctx, event)
+	})
 
 }
