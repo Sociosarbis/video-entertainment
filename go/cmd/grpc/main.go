@@ -37,6 +37,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.Printf("%s %s\n", req.RemoteAddr, req.Method)
 	header := w.Header()
 	proxyPath := req.Header.Get("X-Grpc-Method")
+	if os.Getenv("GO_ENV") != "development" {
+		req.Header.Set("Content-Type", "application/grpc-web+proto")
+	}
 	body, err := ioutil.ReadAll(req.Body)
 	if err == nil {
 		log.Printf("body(%v): %s", len(body), string(body))
