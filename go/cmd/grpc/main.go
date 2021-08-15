@@ -19,6 +19,10 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	GRPC_HEADER_SIZE = 5
+)
+
 type Handler struct {
 	server *grpcweb.WrappedGrpcServer
 }
@@ -40,6 +44,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 	req.Body.Close()
+	if len(body) < GRPC_HEADER_SIZE {
+		padding := make([]byte, GRPC_HEADER_SIZE-len(body))
+		body = append(body, padding...)
+	}
 	req.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 	if len(proxyPath) != 0 {
 		req.URL.Path = proxyPath
@@ -75,9 +83,9 @@ func main() {
 		}
 		return
 	}
-	lambda.Start(func(ctx context.Context, event events.APIGatewayProxyRequest) {
+	lambda.Start(func(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 		log.Printf("raw body(%v;encoded:%v): %s(%v)", len([]byte(event.Body)), event.IsBase64Encoded, event.Body, len(event.Body))
-		handlerfunc.New(h.ServeHTTP).ProxyWithContext(ctx, event)
+		return handlerfunc.New(h.ServeHTTP).ProxyWithContext(ctx, event)
 	})
 
 }
