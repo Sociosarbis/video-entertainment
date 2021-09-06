@@ -1,6 +1,6 @@
 import axios from '../helpers/axios';
 
-const API_URL = 'https://www.mhapi123.com/inc/api_mac10.php';
+const API_URL = 'https://api.apibdzy.com/api.php/provide/vod/';
 
 type Result = {
   name: string;

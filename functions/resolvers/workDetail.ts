@@ -1,6 +1,6 @@
 import axios from '../helpers/axios';
 
-const BASE_URL = 'https://www.mhapi123.com/inc/api_mac10.php';
+const BASE_URL = 'https://api.apibdzy.com/api.php/provide/vod/';
 
 type Resource = {
   name: string;
