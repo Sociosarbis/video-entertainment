@@ -107,6 +107,12 @@ const Search = forwardRef<
         placeholder="影片名称"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
+        onKeyPress={(e) => {
+          if (e.key === 'Enter') {
+            (e.target as HTMLInputElement).blur();
+            onConfirm(inputValue);
+          }
+        }}
       />
       <div className="mb-2">
         <input
@@ -270,7 +276,7 @@ function Home() {
         component="div"
         className={cls('overflow-auto', 'flex-1')}
         onScroll={onScroll}
-        style={{ paddingTop: `${padding}px` }}
+        style={{ paddingTop: `${padding}px`, paddingBottom: '20px' }}
         ref={container}
       >
         {player.work ? (

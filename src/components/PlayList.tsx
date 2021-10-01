@@ -14,8 +14,8 @@ export const useStyle = makeStyles({
   container: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
-    gridRowGap: '10px',
-    gridColumnGap: '5px',
+    gridRowGap: '20px',
+    gridColumnGap: '10px',
   },
   slider: {
     padding: '0 30px',
