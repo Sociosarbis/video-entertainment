@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import cls from 'classnames';
 import { makeStyles, Slider } from '@material-ui/core';
 import { Work, Resource } from '../apis/work';
@@ -42,6 +42,26 @@ export default function PlayList(props: PlayListProps) {
   );
 
   const start = sliders.reduce((acc, item) => acc + item.i, 0);
+  const hasPreviousUrlOnSameWork = useRef(false);
+  const previousWork = useRef<Work | null>(null);
+  useEffect(() => {
+    if (!hasPreviousUrlOnSameWork.current) {
+      const index =
+        work?.playList.findIndex((item) => item.url === currentUrl) ?? -1;
+      if (~index) {
+        sliders.reduceRight((acc, item, i) => {
+          const v = Math.floor(acc / item.step);
+          setSliders({ type: 'change', data: { i, v: v * item.step } });
+          return acc % item.step;
+        }, index);
+        hasPreviousUrlOnSameWork.current = true;
+      }
+      if (work !== previousWork.current) {
+        previousWork.current = work;
+        hasPreviousUrlOnSameWork.current = false;
+      }
+    }
+  }, [work, currentUrl]);
 
   return work ? (
     <div>
