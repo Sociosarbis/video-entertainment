@@ -58,8 +58,7 @@ export default function History() {
                   key={i}
                   onClick={async () => {
                     await player.selectPlayList(item.work);
-                    player.controller.current &&
-                      player.controller.current.handlePlay(item.url);
+                    player.controller.current?.handlePlay(item.url);
                     history.replace('/');
                   }}
                 >

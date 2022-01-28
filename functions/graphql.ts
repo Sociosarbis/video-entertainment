@@ -1,5 +1,4 @@
-import { ApolloServer, gql, GraphQLExtension } from 'apollo-server-lambda';
-import { print } from 'graphql';
+import { ApolloServer, gql, GraphQLOptions } from 'apollo-server-lambda';
 import { resolve as resolveWorks } from './resolvers/works';
 import { resolve as resolveWorkDetail } from './resolvers/workDetail';
 import { resolve as resolveCalendar } from './resolvers/calendar';
@@ -15,6 +14,7 @@ const typeDefs = gql`
   }
 
   type WorkDetail {
+    infos: Work
     playList: [Resource]
     image: String
   }
@@ -25,7 +25,6 @@ const typeDefs = gql`
     tag: String
     utime: String
     id: Int
-    detail: WorkDetail
   }
 
   type BgmWork {
@@ -96,24 +95,19 @@ const typeDefs = gql`
   }
 `;
 
-type ExtensionProto = Required<typeof GraphQLExtension.prototype>;
-class BasicLogging {
-  requestDidStart({
-    queryString,
-    parsedQuery,
-    variables,
-  }: Required<Parameters<ExtensionProto['requestDidStart']>[0]>) {
-    const query = queryString || print(parsedQuery);
-    console.log(query);
-    console.log(variables);
-  }
+type ServerPlugin = NonNullable<GraphQLOptions['plugins']>[0];
 
-  willSendResponse({
-    graphqlResponse,
-  }: Parameters<ExtensionProto['willSendResponse']>[0]) {
-    console.log(JSON.stringify(graphqlResponse, null, 2));
-  }
-}
+const basicLogging: ServerPlugin = {
+  requestDidStart(context) {
+    console.log(context.request.query);
+    console.log(context.request.variables);
+    return {
+      willSendResponse: (context) => {
+        console.log(JSON.stringify(context.response, null, 2));
+      },
+    };
+  },
+};
 
 const server = new ApolloServer({
   typeDefs,
@@ -138,11 +132,6 @@ const server = new ApolloServer({
         return await resolveEpisodeTopic(args.id, context.cookie);
       },
     },
-    Work: {
-      async detail(parent) {
-        return await resolveWorkDetail({ id: parent.id });
-      },
-    },
   },
   context: (info) => {
     console.log(info.event.headers);
@@ -150,7 +139,7 @@ const server = new ApolloServer({
       cookie: parse(info.event.headers.cookie),
     };
   },
-  extensions: [() => new BasicLogging()],
+  plugins: [basicLogging],
 });
 
 const handler = server.createHandler();

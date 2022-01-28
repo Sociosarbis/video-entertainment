@@ -4,6 +4,7 @@ import React, {
   useRef,
   useEffect,
   useContext,
+  useMemo,
   SyntheticEvent,
   forwardRef,
   MutableRefObject,
@@ -21,7 +22,7 @@ import { PlayerContext, Player } from '../hooks/usePlayer';
 import { DBContext } from '../contexts/db';
 import { omit } from '../utils/obj';
 import { useApolloClient } from 'react-apollo';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams, useHistory } from 'react-router-dom';
 import { gql } from 'apollo-boost';
 import cls from 'classnames';
 import { useBaseStyles } from '../styles/base';
@@ -133,7 +134,10 @@ function Home() {
   const [workList, setWorkList] = useState<FindWorksResponse>([]);
   const player = useContext(PlayerContext) as Player;
   const db = useContext(DBContext);
+  const isInited = useRef(false);
   const location = useLocation<any>();
+  const history = useHistory();
+  const params = useParams<{ work_id?: string; ep_id?: string }>();
   const searchRef = useRef<SearchRef>(null);
   const { setOpen, ListDialog } = useListDialog();
   const { showMessage, withLoading } = useContext(
@@ -149,6 +153,47 @@ function Home() {
     },
     [setOpen, player, searchRef],
   );
+
+  useEffect(() => {
+    (async function () {
+      if (!isNaN(Number(params.work_id))) {
+        await player.selectPlayList({
+          id: Number(params.work_id),
+        });
+        if (player.work && params.ep_id) {
+          if (Number(params.ep_id) < player.work.playList.length) {
+            player.controller.current?.handlePlay(
+              player.work.playList[Number(params.ep_id)].url,
+            );
+          }
+        }
+      }
+      isInited.current = true;
+    })();
+  }, []);
+
+  const pageUrl = useMemo(() => {
+    let path = '/videos';
+    if (player.work) {
+      path += `/${player.work.id}`;
+      if (~player.epIndex) {
+        path += `/${player.epIndex}`;
+      }
+    }
+    return path;
+  }, [player.work, player.epIndex]);
+
+  useEffect(() => {
+    if (isInited.current) {
+      if (
+        (location.pathname === '/' ||
+          location.pathname.startsWith('/videos')) &&
+        location.pathname !== pageUrl
+      ) {
+        history.replace(pageUrl);
+      }
+    }
+  }, [pageUrl, location]);
 
   const client = useApolloClient();
 
@@ -169,8 +214,8 @@ function Home() {
         }
         player.setVideoUrl(url);
         if (player.work) {
-          const chap = player.work.playList.find((item) => item.url === url);
-          if (chap) {
+          if (~player.epIndex) {
+            const chap = player.work.playList[player.epIndex];
             db.set<Omit<Work, 'playList'>>(
               'work',
               String(player.work.id),

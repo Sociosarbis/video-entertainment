@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import cls from 'classnames';
 import { Route, useHistory, useLocation, matchPath } from 'react-router-dom';
 import { CSSTransition } from 'react-transition-group';
@@ -28,16 +28,38 @@ const useStyles = makeStyles(() => ({
 }));
 
 type RouteConfig = {
-  path: string;
+  path: string | string[];
   component: () => JSX.Element;
   meta: {
     title: string;
   };
 };
 
-const routeConfig = [
+const bottomRoutes = [
   {
     path: '/',
+    match: '/videos',
+    meta: {
+      title: '播放',
+    },
+  },
+  {
+    path: '/history',
+    meta: {
+      title: '历史',
+    },
+  },
+  {
+    path: '/calendar',
+    meta: {
+      title: '每日放送',
+    },
+  },
+];
+
+const routeConfig = [
+  {
+    path: ['/videos/:work_id/:ep_id', '/videos/:work_id', '/'],
     component: Home,
     meta: {
       title: '播放',
@@ -88,20 +110,22 @@ function MainApp() {
   const player = usePlayer();
   return (
     <PlayerContext.Provider value={player}>
-      {routeConfig.map((item) => {
+      {routeConfig.map((item, i) => {
         return (
-          <Route path={item.path} key={item.path}>
-            {({ match }) => (
-              <CSSTransition
-                in={match != null}
-                classNames="slide-up"
-                timeout={{ enter: 250, exit: 200 }}
-                mountOnEnter={true}
-                unmountOnExit={true}
-              >
-                <item.component />
-              </CSSTransition>
-            )}
+          <Route path={item.path} key={i}>
+            {({ match }) => {
+              return (
+                <CSSTransition
+                  in={match != null}
+                  classNames="slide-up"
+                  timeout={{ enter: 250, exit: 200 }}
+                  mountOnEnter={true}
+                  unmountOnExit={true}
+                >
+                  <item.component />
+                </CSSTransition>
+              );
+            }}
           </Route>
         );
       })}
@@ -128,6 +152,18 @@ function App() {
       });
     },
   );
+  const activePath = useMemo(() => {
+    let path = '';
+    bottomRoutes.forEach((item) => {
+      if (
+        matchPath(location.pathname, item.path) &&
+        item.path.length > path.length
+      ) {
+        path = item.path;
+      }
+    });
+    return path;
+  }, [location.pathname]);
   return (
     <CustomThemeProvider>
       <Title />
@@ -136,18 +172,17 @@ function App() {
       </GlobalContext.Provider>
       <BottomNavigation
         showLabels
+        value={activePath}
         classes={{ root: cls(baseClasses.btn, classes.bottom, 'w-full') }}
       >
-        {routeConfig.map((item, i) => {
+        {bottomRoutes.map((item, i) => {
           return (
             <BottomNavigationAction
               key={i}
               classes={{
-                root: cls(
-                  classes.bottomItem,
-                  location.pathname === item.path ? baseClasses.container : '',
-                ),
+                root: cls(classes.bottomItem),
               }}
+              value={item.path}
               label={<Typography variant="h6">{item.meta.title}</Typography>}
               onClick={() => history.replace(item.path)}
             ></BottomNavigationAction>

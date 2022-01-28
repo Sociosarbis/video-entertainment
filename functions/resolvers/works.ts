@@ -2,7 +2,7 @@ import axios from '../helpers/axios';
 
 const API_URL = 'https://api.apibdzy.com/api.php/provide/vod/';
 
-type Result = {
+export type Result = {
   name: string;
   cate: string;
   tag: string;

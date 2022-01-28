@@ -14,8 +14,11 @@ import { gql } from 'apollo-boost';
 export type Player = {
   work: Work | null;
   videoUrl: string;
+  epIndex: number;
   setVideoUrl: React.Dispatch<React.SetStateAction<string>>;
-  selectPlayList: (item: FindWorksResponse[0]) => Promise<void>;
+  selectPlayList: (
+    item: Partial<FindWorksResponse[0]> & { id: number },
+  ) => Promise<void>;
   controller: React.MutableRefObject<{
     handlePlay: (url: string) => any;
   } | null>;
@@ -29,6 +32,10 @@ export default function usePlayer(): Player {
   ) as GlobalContextValue;
   const [work, setWork] = useState<Work | null>(null);
   const [videoUrl, setVideoUrl] = useState('');
+  const epIndex = useMemo(
+    () => work?.playList.findIndex((item) => item.url === videoUrl) ?? -1,
+    [videoUrl, work],
+  );
   const client = useApolloClient();
   const selectPlayList = useCallback(
     async (item: FindWorksResponse[0]) => {
@@ -45,6 +52,12 @@ export default function usePlayer(): Player {
                   name
                 }
                 image
+                infos {
+                  name
+                  cate
+                  tag
+                  utime
+                }
               }
             }
           `,
@@ -54,7 +67,11 @@ export default function usePlayer(): Player {
         }),
       );
       if (res.playList.length) {
-        const work = Object.assign(item, res);
+        const work = Object.assign(item, {
+          playList: res.playList,
+          image: res.image,
+          ...res.infos,
+        });
         setWork(work);
       } else {
         showMessage('没发现可播放源');
@@ -67,6 +84,7 @@ export default function usePlayer(): Player {
     videoUrl,
     setVideoUrl,
     work,
+    epIndex,
     controller,
     selectPlayList,
   });

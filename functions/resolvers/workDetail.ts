@@ -1,4 +1,5 @@
 import axios from '../helpers/axios';
+import { Result as Infos } from './works';
 
 const BASE_URL = 'https://api.apibdzy.com/api.php/provide/vod/';
 
@@ -8,12 +9,21 @@ type Resource = {
 };
 
 type Result = {
+  infos: Infos;
   playList: Resource[];
   image: string;
 };
 
 type Input = {
-  list: { vod_pic: string; vod_play_url: string }[];
+  list: {
+    vod_pic: string;
+    vod_play_url: string;
+    vod_name: string;
+    type_name: string;
+    vod_remarks: string;
+    vod_time: string;
+    vod_id: number;
+  }[];
 };
 
 export async function resolve({ id }: { id: number }) {
@@ -25,9 +35,17 @@ export async function resolve({ id }: { id: number }) {
       },
     })
   ).data;
+  const item = page.list[0];
   const res: Result = {
     playList: [],
-    image: page.list[0].vod_pic,
+    image: item.vod_pic,
+    infos: {
+      name: item.vod_name,
+      cate: item.type_name,
+      tag: item.vod_remarks,
+      utime: item.vod_time,
+      id: item.vod_id,
+    },
   };
   const $playLists = page.list[0].vod_play_url.split('$$$');
   for (let j = 0; j < $playLists.length; j++) {
