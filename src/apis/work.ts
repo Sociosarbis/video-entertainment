@@ -52,6 +52,8 @@ export type HistoryItem = {
   chap: string;
   utime: number;
   id: number;
+  currentTime?: number;
+  duration?: number;
 };
 
 export type Work = FindWorksResponse[0] & GetPlayListResponse;
