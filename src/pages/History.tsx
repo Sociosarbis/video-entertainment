@@ -5,14 +5,17 @@ import {
   Paper,
   List,
   ListItem,
-  ListItemText,
   Typography,
   Grid,
   Card,
   makeStyles,
+  ExpansionPanel,
+  ExpansionPanelDetails,
+  ExpansionPanelSummary,
+  CardContent,
 } from '@material-ui/core';
 import { useBaseStyles } from '../styles/base';
-import workApis, { GetHistoryFromDBResult } from '../apis/work';
+import workApis, { GetHistoryFromDBResult, Work } from '../apis/work';
 import { PlayerContext, Player } from '../hooks/usePlayer';
 import useMount from '../hooks/useMount';
 import FadeInImage from '../components/FadeInImage';
@@ -28,15 +31,25 @@ export default function History() {
   const baseClasses = useBaseStyles({});
   const player = useContext(PlayerContext) as Player;
   const classes = useStyles({});
-  const [items, setItems] = useState<GetHistoryFromDBResult[]>([]);
+  const [items, setItems] = useState<
+    (Work & { list: GetHistoryFromDBResult[] })[]
+  >([]);
   const history = useHistory<any>();
   useMount(
     {
       setItems,
     },
     async ({ setItems }) => {
-      const items = await workApis.getHistoryFromDB(0, 10);
-      setItems(items);
+      const workList = await workApis.listWorksFromDB(0, 10);
+      const items = await Promise.all(
+        workList.map((work) => workApis.getHistoryFromDB(0, 10, work.id)),
+      );
+      setItems(
+        workList.map((item, i) => ({
+          ...item,
+          list: items[i],
+        })),
+      );
     },
   );
   return (
@@ -52,26 +65,57 @@ export default function History() {
           >
             {items.map((item, i) => {
               return (
-                <ListItem
-                  button
-                  divider
-                  key={i}
-                  onClick={async () => {
-                    await player.selectPlayList(item.work);
-                    player.controller.current?.handlePlay(item.url);
-                    history.replace('/');
-                  }}
-                >
-                  <Card className="mr-2">
-                    <FadeInImage
-                      classes={{ root: classes.workImage }}
-                      src={item.work.image}
-                    />
-                  </Card>
-                  <ListItemText
-                    primary={item.work.name}
-                    secondary={item.chap}
-                  ></ListItemText>
+                <ListItem divider key={i}>
+                  <ExpansionPanel
+                    classes={{
+                      root: cls(baseClasses.primary, 'w-full'),
+                    }}
+                  >
+                    <ExpansionPanelSummary
+                      expandIcon={
+                        <Typography variant="h6" color="textPrimary">
+                          ↓
+                        </Typography>
+                      }
+                    >
+                      <Card
+                        className="mr-2"
+                        classes={{
+                          root: cls(
+                            'w-full',
+                            'd-flex',
+                            baseClasses.primary,
+                            'align-center',
+                          ),
+                        }}
+                      >
+                        <FadeInImage
+                          classes={{ root: classes.workImage }}
+                          src={item.image}
+                        />
+                        <CardContent>{item.name}</CardContent>
+                      </Card>
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails>
+                      <List classes={{ root: 'w-full' }}>
+                        {item.list.map((item, i) => (
+                          <ListItem
+                            button
+                            divider
+                            key={i}
+                            classes={{ root: baseClasses.container }}
+                            onClick={async () => {
+                              await player.selectPlayList(item.work);
+                              player.controller.current?.handlePlay(item.url);
+                              history.replace('/');
+                            }}
+                          >
+                            {item.chap}
+                          </ListItem>
+                        ))}
+                      </List>
+                    </ExpansionPanelDetails>
+                  </ExpansionPanel>
                 </ListItem>
               );
             })}

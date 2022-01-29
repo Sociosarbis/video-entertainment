@@ -751,6 +751,10 @@ html {
   margin-right: 10px;
 }
 
+.mb-2 {
+  margin-bottom: 10px;
+}
+
 .overflow-auto {
   overflow: auto;
 }
@@ -789,4 +793,12 @@ html {
 
 .float-right {
   float: right;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.align-center {
+  align-items: center;
 }

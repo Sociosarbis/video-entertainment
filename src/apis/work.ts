@@ -80,9 +80,19 @@ class WorkApis {
     return await db.get<Work>('work', String(id));
   }
 
-  async getHistoryFromDB(offset: number, size: number) {
+  async listWorksFromDB(offset: number, size: number) {
+    return await db.getRange<Work>('work', offset, size, {
+      index: 'visited_at',
+      order: 'prev',
+    });
+  }
+
+  async getHistoryFromDB(offset: number, size: number, id?: number) {
     const items = await db.getRange<HistoryItem>('history', offset, size, {
-      index: 'utime',
+      index: 'id-utime',
+      query: id
+        ? IDBKeyRange.bound([id, 0], [id, Number.MAX_SAFE_INTEGER])
+        : undefined,
       order: 'prev',
     });
     const workMap = items.reduce((acc, item) => {

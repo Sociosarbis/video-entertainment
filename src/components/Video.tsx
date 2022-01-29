@@ -31,15 +31,16 @@ export default function Video() {
         if (player.work) {
           if (~player.epIndex) {
             const chap = player.work.playList[player.epIndex];
-            db.set<Omit<Work, 'playList'>>(
+            const currentTime = Math.floor(new Date().valueOf() / 1000);
+            db.set(
               'work',
               String(player.work.id),
-              omit(player.work, ['playList']),
+              omit({ ...player.work, visited_at: currentTime }, ['playList']),
             ).then(() =>
-              db.set<HistoryItem>('history', url, {
+              db.set('history', url, {
                 ...item,
                 url,
-                utime: Math.floor(new Date().valueOf() / 1000),
+                utime: currentTime,
                 chap: chap.name,
                 id: (player.work as Work).id,
               }),
@@ -81,7 +82,7 @@ export default function Video() {
         const currentTime = playerRef.current.currentTime;
         if (Math.abs(currentTime - lastTime.current) > 5) {
           lastTime.current = playerRef.current.currentTime;
-          db.set<HistoryItem>('history', player.videoUrl, {
+          db.set('history', player.videoUrl, {
             url: player.videoUrl,
             currentTime,
             duration: playerRef.current.duration,

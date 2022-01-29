@@ -92,13 +92,17 @@ class SoDB {
     storeName: string,
     offset: number,
     size: number,
-    { index, order }: { index?: string; order?: 'next' | 'prev' } = {},
+    {
+      index,
+      order,
+      query,
+    }: { index?: string; order?: 'next' | 'prev'; query?: IDBKeyRange } = {},
   ): Promise<T[]> {
     const db = await this.connect();
     const store = db.transaction(storeName).objectStore(storeName);
     const cursorReq = index
-      ? store.index(index).openCursor(undefined, order)
-      : store.openCursor(undefined, order);
+      ? store.index(index).openCursor(query, order)
+      : store.openCursor(query, order);
     const ret: T[] = [];
     let i = 0;
     let hasAdvanced = offset ? false : true;
