@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import cls from 'classnames';
 import { Route, useHistory, useLocation, matchPath } from 'react-router-dom';
 import { CSSTransition } from 'react-transition-group';
@@ -26,14 +26,6 @@ const useStyles = makeStyles(() => ({
     maxWidth: 'none',
   },
 }));
-
-type RouteConfig = {
-  path: string | string[];
-  component: () => JSX.Element;
-  meta: {
-    title: string;
-  };
-};
 
 const bottomRoutes = [
   {
@@ -83,25 +75,24 @@ const routeConfig = [
 
 function Title() {
   const location = useLocation<any>();
-  const matches: RouteConfig[] = [];
-  for (const route of routeConfig) {
-    if (
-      matchPath(location.pathname, {
-        path: route.path,
-      })
-    ) {
-      matches.push(route);
-    }
-  }
-
-  if (matches.length) {
-    for (const match of matches.reverse()) {
-      if (match.meta.title) {
-        document.title = match.meta.title;
-        break;
+  const title = useMemo(() => {
+    let path = '';
+    let title = '';
+    bottomRoutes.forEach((item) => {
+      if (
+        matchPath(location.pathname, item.path) &&
+        item.path.length > path.length
+      ) {
+        path = item.path;
+        title = item.meta.title;
       }
-    }
-  }
+    });
+    return title;
+  }, [location.pathname]);
+
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
 
   return null;
 }

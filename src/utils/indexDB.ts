@@ -11,6 +11,8 @@ function promisifyTransaction<T>(req: IDBRequest): Promise<T> {
   });
 }
 
+type UpgradeHandler = (req: IDBOpenDBRequest) => any;
+
 class SoDB {
   private _db: IDBDatabase | null;
   private _dbName: string;
@@ -20,19 +22,17 @@ class SoDB {
     this._db = null;
     this._dbName = name;
     this._version = version;
-    this._resolveDbPromise = this.connect(this._version, (db) => {
+    this._resolveDbPromise = this.connect(this._version, (req) => {
       const name = `v${this._version}`;
       if (name in versionHandlers) {
-        (versionHandlers as Record<string, (db: IDBDatabase) => void>)[name](
-          db,
-        );
+        (versionHandlers as Record<string, UpgradeHandler>)[name](req);
       }
     });
   }
 
   connect(
     version: number | undefined = undefined,
-    handleUpgrade: (db: IDBDatabase) => any = () => {
+    handleUpgrade: (req: IDBOpenDBRequest) => any = () => {
       //
     },
   ): Promise<IDBDatabase> {
@@ -57,7 +57,7 @@ class SoDB {
           rej(req.error);
         };
         req.onupgradeneeded = () => {
-          handleUpgrade.call(this, req.result);
+          handleUpgrade.call(this, req);
         };
       });
       return this._resolveDbPromise;

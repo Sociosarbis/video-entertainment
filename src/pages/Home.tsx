@@ -181,14 +181,20 @@ function Home() {
   useEffect(() => {
     if (isInited.current) {
       if (
-        (location.pathname === '/' ||
-          location.pathname.startsWith('/videos')) &&
-        location.pathname !== pageUrl
+        location.pathname === '/' ||
+        location.pathname.startsWith('/videos')
       ) {
-        history.replace(pageUrl);
+        if (location.pathname !== pageUrl) {
+          history.replace(pageUrl);
+        }
+        if (~player.epIndex) {
+          document.title = `正在播放 ${player.work?.name} ${
+            player.work?.playList[player.epIndex].name
+          }`;
+        }
       }
     }
-  }, [pageUrl, location]);
+  }, [pageUrl, location.pathname]);
 
   const client = useApolloClient();
 
