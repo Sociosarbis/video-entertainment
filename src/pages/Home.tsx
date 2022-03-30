@@ -7,8 +7,8 @@ import React, {
   useMemo,
   SyntheticEvent,
   forwardRef,
-  MutableRefObject,
   useReducer,
+  useImperativeHandle,
 } from 'react';
 import PlayList from '../components/PlayList';
 import Video from '../components/Video';
@@ -81,11 +81,15 @@ const Search = forwardRef<
     0,
   );
   const [inputValue, setInputValue] = useState('');
-  (ref as MutableRefObject<SearchRef>).current = {
-    setInputValue,
-    inputValue,
-    changeOffset,
-  };
+  useImperativeHandle(
+    ref,
+    () => ({
+      setInputValue,
+      inputValue,
+      changeOffset,
+    }),
+    [inputValue],
+  );
   return (
     <div
       ref={rootRef}
@@ -249,7 +253,7 @@ function Home() {
         searchRef.current.setInputValue(text);
       }
     }
-  }, [location.search, searchRef]);
+  }, [location.search]);
 
   return (
     <Grid
